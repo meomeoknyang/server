@@ -1,0 +1,19 @@
+[
+    {"model": "restaurants.category", "pk": 1, "fields": {"name": "한식"}},
+    {"model": "restaurants.category", "pk": 2, "fields": {"name": "찜/탕"}},
+    {"model": "restaurants.category", "pk": 3, "fields": {"name": "구이"}},
+    {"model": "restaurants.category", "pk": 4, "fields": {"name": "치킨"}},
+    {"model": "restaurants.category", "pk": 5, "fields": {"name": "분식"}},
+    {"model": "restaurants.category", "pk": 6, "fields": {"name": "돈까스"}},
+    {"model": "restaurants.category", "pk": 7, "fields": {"name": "족발/보쌈"}},
+    {"model": "restaurants.category", "pk": 8, "fields": {"name": "피자"}},
+    {"model": "restaurants.category", "pk": 9, "fields": {"name": "중식"}},
+    {"model": "restaurants.category", "pk": 10, "fields": {"name": "일식"}},
+    {"model": "restaurants.category", "pk": 11, "fields": {"name": "회/해물"}},
+    {"model": "restaurants.category", "pk": 12, "fields": {"name": "양식"}},
+    {"model": "restaurants.category", "pk": 13, "fields": {"name": "아시안"}},
+    {"model": "restaurants.category", "pk": 14, "fields": {"name": "샌드위치"}},
+    {"model": "restaurants.category", "pk": 15, "fields": {"name": "버거"}},
+    {"model": "restaurants.category", "pk": 16, "fields": {"name": "멕시칸"}},
+    {"model": "restaurants.category", "pk": 17, "fields": {"name": "패스트푸드"}}
+]
