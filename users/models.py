@@ -10,7 +10,7 @@ class CustomUser(AbstractUser):
         ('baksa', '쩝쩝 박사'),
         ('kyosu', '꿀꺽 교수'),
     ]
-
+    user_id = models.CharField(max_length=20, unique=True)  # 새로운 아이디 필드 추가
     title = models.CharField(max_length=10, choices=TITLE_CHOICES, default='haksa')
     nickname = models.CharField(max_length=30, unique=True)
     name = models.CharField(max_length=50)
