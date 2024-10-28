@@ -1,0 +1,8 @@
+[
+    {"model": "reviews.keyword", "pk": 1, "fields": {"description": "여기 없어지면 에리카 퇴학합니다."}},
+    {"model": "reviews.keyword", "pk": 2, "fields": {"description": "지갑 지키고 싶을 때, 여기 추천"}},
+    {"model": "reviews.keyword", "pk": 3, "fields": {"description": "할머니 집 같이 정 많은 식당"}},
+    {"model": "reviews.keyword", "pk": 4, "fields": {"description": "동기들과 함께라면 럭키비키"}},
+    {"model": "reviews.keyword", "pk": 5, "fields": {"description": "재료가 살아있네~"}}
+  ]
+  

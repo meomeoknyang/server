@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "restaurants",
     "django_filters",
+    "reviews",
 ]
 
 MIDDLEWARE = [
