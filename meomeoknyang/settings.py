@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django_filters",
     "reviews",
     "users"
+    "baseplace",
 ]
 
 from datetime import timedelta
