@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "users",
     "baseplace",
     "cafe",
+    "stamps",
 ]
 
 from datetime import timedelta
