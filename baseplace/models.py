@@ -16,7 +16,7 @@ class BasePlace(models.Model):
     """
     Restaurant와 Cafe가 상속받을 공통 모델
     """
-    place_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)  # 고유 식별자
+    place_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)  # 장소 이름
     opening_hours = models.CharField(max_length=255)  # 운영 시간
     image_url = models.URLField(max_length=500, blank=True, null=True)  # 대표 이미지 URL
@@ -27,6 +27,8 @@ class BasePlace(models.Model):
     open_date = models.DateField(blank=True, null=True)  # 오픈일
     departments = models.ManyToManyField(Department, related_name="places", null=True)  # 제휴 학과 다대다 관계
     average_price = models.IntegerField(blank=True, null=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)  # 위도
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)  # 경도
     
     class Meta:
         abstract = True  # 추상 모델로 설정하여 데이터베이스에 테이블을 만들지 않음
@@ -80,3 +82,17 @@ class BreakTime(models.Model):
 
     def __str__(self):
         return f"{self.place.name} - {self.get_day_display()}: {self.start_time} ~ {self.end_time}"
+    
+class Menu(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    place = GenericForeignKey('content_type', 'object_id')
+
+    name = models.CharField(max_length=100)
+    price = models.IntegerField()
+    description = models.TextField(blank=True)
+    image_url = models.URLField(max_length=500, blank=True, null=True)
+    is_special = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.name} - {self.place.name}"

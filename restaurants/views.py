@@ -1,9 +1,10 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Restaurant
-from .serializers import RestaurantSerializer
+from .serializers import RestaurantSerializer, RestaurantLocationSerializer
 from urllib.parse import unquote
+from django.db.models import Count
 
 class RestaurantViewSet(viewsets.ModelViewSet):
     queryset = Restaurant.objects.all()  # 기본 전체 쿼리셋 설정
@@ -49,3 +50,7 @@ class RestaurantDetailView(APIView):
             # 다른 예외 처리 (선택 사항)
             return Response({"error": "알 수 없는 오류가 발생했습니다."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class RestaurantLocationView(generics.RetrieveAPIView):
+    queryset = Restaurant.objects.all()
+    serializer_class = RestaurantLocationSerializer
+    lookup_field = 'place_id'
