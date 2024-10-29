@@ -30,11 +30,15 @@ class RestaurantViewSet(viewsets.ModelViewSet):
 
 
 class RestaurantDetailView(APIView):
-    def get(self, request, name):
-        decoded_name = unquote(name)
+    def get(self, request, place_id):
+        # decoded_name = unquote(name)
         try:
-            # 이름으로 식당 검색
-            restaurant = Restaurant.objects.get(name=decoded_name)
+            # # 이름으로 식당 검색
+            # restaurant = Restaurant.objects.get(name=decoded_name)
+            # serializer = RestaurantSerializer(restaurant)
+            # return Response(serializer.data)
+            # place_id로 식당 검색
+            restaurant = Restaurant.objects.get(place_id=place_id)
             serializer = RestaurantSerializer(restaurant)
             return Response(serializer.data)
         except Restaurant.DoesNotExist:
