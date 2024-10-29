@@ -16,7 +16,7 @@ class BasePlace(models.Model):
     """
     Restaurant와 Cafe가 상속받을 공통 모델
     """
-    place_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)  # 고유 식별자
+    place_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)  # 장소 이름
     opening_hours = models.CharField(max_length=255)  # 운영 시간
     image_url = models.URLField(max_length=500, blank=True, null=True)  # 대표 이미지 URL
