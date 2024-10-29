@@ -16,6 +16,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer(read_only=True) #사용자 정보
     keywords = serializers.PrimaryKeyRelatedField(queryset=Keyword.objects.all(), many=True)  # 다중 키워드 필드
     images = ReviewImageSerializer(many=True, read_only=True)  # 다중 이미지 시리얼라이저 필드
+    visit_count = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = Review

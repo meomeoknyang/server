@@ -80,3 +80,17 @@ class BreakTime(models.Model):
 
     def __str__(self):
         return f"{self.place.name} - {self.get_day_display()}: {self.start_time} ~ {self.end_time}"
+    
+class Menu(models.Model):
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    place = GenericForeignKey('content_type', 'object_id')
+
+    name = models.CharField(max_length=100)
+    price = models.IntegerField()
+    description = models.TextField(blank=True)
+    image_url = models.URLField(max_length=500, blank=True, null=True)
+    is_special = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.name} - {self.place.name}"

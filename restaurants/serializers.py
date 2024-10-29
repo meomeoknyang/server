@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import Restaurant, Category, Menu
+from .models import Restaurant, Category
+from baseplace.models import Menu
+from reviews.models import Review
+from django.db.models import Avg, Count
 
 class CategorySerializer(serializers.ModelSerializer):
     '''
@@ -17,6 +20,15 @@ class MenuSerializer(serializers.ModelSerializer):
         model = Menu
         fields = ['id', 'name', 'price', 'description', 'image_url', 'is_special']  # 메뉴 관련 필드 반환
 
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(source='user.nickname')  # 닉네임
+    title = serializers.StringRelatedField(source='user.title')  # 칭호
+    visit_count = serializers.IntegerField()  # 몇 번째 방문인지
+
+    class Meta:
+        model = Review
+        fields = ['user', 'title', 'visit_count', 'comment', 'created_at']
+
 class RestaurantSerializer(serializers.ModelSerializer):
     '''
     ### 식당 시리얼라이저
@@ -25,12 +37,16 @@ class RestaurantSerializer(serializers.ModelSerializer):
     
     categories = CategorySerializer(many=True)  # 카테고리: Many-to-Many 관계
     menus = MenuSerializer(many=True, read_only=True)  # 메뉴: ForeignKey로 연결, ReadOnly로 처리
-
+    average_rating = serializers.SerializerMethodField()
+    keywords = serializers.SerializerMethodField()
+    comments = serializers.SerializerMethodField()
+    departments = serializers.StringRelatedField(many=True)
     class Meta:
         model = Restaurant
         fields = [
             'place_id', 'name', 'categories', 'opening_hours', 'image_url', 'contact',
-            'distance_from_gate', 'address', 'phone_number', 'open_date', 'menus'
+            'distance_from_gate', 'address', 'phone_number', 'open_date', 'menus', 'average_rating',
+            'keywords', 'comments', 'departments'
         ]
 
     # create 메서드: 카테고리를 처리하여 새 레스토랑을 생성
@@ -67,3 +83,21 @@ class RestaurantSerializer(serializers.ModelSerializer):
             instance.categories.add(category)  # 새 카테고리 연결
 
         return instance
+    
+    def get_menus(self, obj):
+        return MenuSerializer(obj.menus.all()[:5], many=True).data  # 최대 5개의 메뉴 반환
+
+    def get_average_rating(self, obj):
+        return obj.reviews.aggregate(avg_rating=Avg('rating'))['avg_rating']  # 평균 평점
+
+    def get_keywords(self, obj):
+        return (
+            obj.reviews.values('keywords__description')
+            .annotate(count=Count('keywords'))
+            .order_by('-count')
+        )
+
+    def get_comments(self, obj):
+        latest_reviews = obj.reviews.order_by('-created_at')[:3]
+        return CommentSerializer(latest_reviews, many=True).data  # 최근 3개의 코멘트 반환
+

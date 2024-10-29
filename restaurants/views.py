@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from .models import Restaurant
 from .serializers import RestaurantSerializer
 from urllib.parse import unquote
+from django.db.models import Count
 
 class RestaurantViewSet(viewsets.ModelViewSet):
     queryset = Restaurant.objects.all()  # 기본 전체 쿼리셋 설정

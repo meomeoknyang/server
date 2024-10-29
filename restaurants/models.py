@@ -57,20 +57,20 @@ class Restaurant(BasePlace):
     def __str__(self):
         return self.name
     
-class Menu(models.Model):
-    '''
-    restaurant
-    name
-    price
-    description
-    image_url  메뉴 이미지
-    '''
-    restaurant = models.ForeignKey(Restaurant, related_name='menus', on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    price = models.IntegerField()
-    description = models.TextField(blank=True)
-    image_url = models.URLField(max_length=500, blank=True, null=True)  # 메뉴 이미지
-    is_special = models.BooleanField(default=False)  # 특별 메뉴 여부
+# class Menu(models.Model):
+#     '''
+#     restaurant
+#     name
+#     price
+#     description
+#     image_url  메뉴 이미지
+#     '''
+#     restaurant = models.ForeignKey(Restaurant, related_name='menus', on_delete=models.CASCADE)
+#     name = models.CharField(max_length=100)
+#     price = models.IntegerField()
+#     description = models.TextField(blank=True)
+#     image_url = models.URLField(max_length=500, blank=True, null=True)  # 메뉴 이미지
+#     is_special = models.BooleanField(default=False)  # 특별 메뉴 여부
 
-    def __str__(self):
-        return f"{self.name} - {self.restaurant.name}"
+#     def __str__(self):
+#         return f"{self.name} - {self.restaurant.name}"
