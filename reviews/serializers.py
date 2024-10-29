@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Review, Keyword, ReviewImage
+from users.serializers import CustomUserSerializer
 
 class KeywordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,12 +13,27 @@ class ReviewImageSerializer(serializers.ModelSerializer):
         fields = ['image']
 
 class ReviewSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer(read_only=True) #사용자 정보
+    keywords = serializers.PrimaryKeyRelatedField(queryset=Keyword.objects.all(), many=True)  # 다중 키워드 필드
     images = ReviewImageSerializer(many=True, read_only=True)  # 다중 이미지 시리얼라이저 필드
-    image = serializers.ImageField(required=False)  # 단일 이미지 필드
     
     class Meta:
         model = Review
-        fields = ['restaurant', 'rating', 'comment', 'image', 'images', 'created_at']
+        fields = ['restaurant', 'rating', 'keywords', 'comment', 'images', 'created_at']
+
+    def create(self, validated_data):
+        keywords_data = validated_data.pop('keywords')  # 키워드 데이터 분리
+        review = Review.objects.create(**validated_data)  # 리뷰 생성
+
+        # 키워드 추가
+        review.keywords.set(keywords_data)
+
+        # 이미지 업로드가 포함된 경우 처리
+        images = self.context['request'].FILES.getlist('images')
+        for image in images:
+            ReviewImage.objects.create(review=review, image=image)
+
+        return review
 
 """
 POST /api/reviews/
