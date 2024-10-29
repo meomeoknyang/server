@@ -26,7 +26,7 @@ class BasePlace(models.Model):
     distance_from_gate = models.FloatField(blank=True, null=True)  # 정문에서의 거리
     open_date = models.DateField(blank=True, null=True)  # 오픈일
     departments = models.ManyToManyField(Department, related_name="places", null=True)  # 제휴 학과 다대다 관계
-
+    
     class Meta:
         abstract = True  # 추상 모델로 설정하여 데이터베이스에 테이블을 만들지 않음
 

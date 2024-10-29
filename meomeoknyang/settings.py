@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "reviews",
     "users",
     "baseplace",
+    "cafe",
 ]
 
 from datetime import timedelta

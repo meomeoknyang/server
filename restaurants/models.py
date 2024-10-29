@@ -52,6 +52,7 @@ class Restaurant(BasePlace):
     categories: 여러 카테고리와 Many-to-Many 관계 설정
     """
     categories = models.ManyToManyField(Category, related_name='restaurants')
+    departments = models.ManyToManyField(Department, related_name='affiliated_restaurants')  # 제휴 학과
 
     def __str__(self):
         return self.name
