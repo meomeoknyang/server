@@ -4,6 +4,11 @@ from baseplace.models import Menu
 from reviews.models import Review
 from django.db.models import Avg, Count
 
+class RestaurantLocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Restaurant
+        fields = ['place_id', 'latitude', 'longitude']
+
 class CategorySerializer(serializers.ModelSerializer):
     '''
     ### 카테고리 시리얼라이저

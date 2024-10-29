@@ -6,6 +6,11 @@ from baseplace.serializers import OperatingHoursSerializer, BreakTimeSerializer
 from reviews.models import Review
 from django.db.models import Avg, Count
 
+class CafeLocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cafe
+        fields = ['place_id', 'latitude', 'longitude']
+
 class CafeCategorySerializer(serializers.ModelSerializer):
     '''
     ### 카페 카테고리 시리얼라이저

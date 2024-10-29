@@ -3,8 +3,9 @@ from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Cafe
-from .serializers import CafeSerializer
+from .serializers import CafeSerializer, CafeLocationSerializer
 from django.shortcuts import get_object_or_404
+from rest_framework import generics
 
 class CafeViewSet(viewsets.ModelViewSet):
     queryset = Cafe.objects.all()  # 기본 전체 쿼리셋 설정
@@ -35,3 +36,8 @@ class CafeDetailView(APIView):
         cafe = get_object_or_404(Cafe, place_id=place_id)
         serializer = CafeSerializer(cafe)
         return Response(serializer.data)
+
+class CafeLocationView(generics.RetrieveAPIView):
+    queryset = Cafe.objects.all()
+    serializer_class = CafeLocationSerializer
+    lookup_field = 'place_id'

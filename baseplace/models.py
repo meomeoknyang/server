@@ -27,6 +27,8 @@ class BasePlace(models.Model):
     open_date = models.DateField(blank=True, null=True)  # 오픈일
     departments = models.ManyToManyField(Department, related_name="places", null=True)  # 제휴 학과 다대다 관계
     average_price = models.IntegerField(blank=True, null=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)  # 위도
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)  # 경도
     
     class Meta:
         abstract = True  # 추상 모델로 설정하여 데이터베이스에 테이블을 만들지 않음
