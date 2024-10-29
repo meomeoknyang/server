@@ -19,7 +19,10 @@ class ReviewSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Review
-        fields = ['restaurant', 'rating', 'keywords', 'comment', 'images', 'created_at']
+        # fields = ['restaurant', 'rating', 'keywords', 'comment', 'images', 'created_at']
+        fields = [
+            'id', 'restaurant', 'user', 'rating', 'comment', 'keywords', 'created_at', 'images'
+        ]
 
     def create(self, validated_data):
         keywords_data = validated_data.pop('keywords')  # 키워드 데이터 분리

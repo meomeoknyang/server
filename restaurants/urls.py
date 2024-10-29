@@ -8,5 +8,8 @@ router.register(r'restaurants', RestaurantViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),  # 라우터의 URL 패턴 포함
-    path('restaurants/<str:name>/', RestaurantDetailView.as_view(), name='restaurant-detail'),
+
+    # place_id로 단일 조회
+    path('restaurants/<uuid:place_id>/', RestaurantDetailView.as_view(), name='restaurant-detail'),
+    #GET /restaurants/<place_id>/ 
 ]

@@ -29,13 +29,13 @@ class RestaurantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
         fields = [
-            'store_id', 'name', 'categories', 'opening_hours', 'image_url', 'contact',
-            'distance_from_gate', 'address', 'menus'
+            'place_id', 'name', 'categories', 'opening_hours', 'image_url', 'contact',
+            'distance_from_gate', 'address', 'phone_number', 'open_date', 'menus'
         ]
 
     # create 메서드: 카테고리를 처리하여 새 레스토랑을 생성
     def create(self, validated_data):
-        categories_data = validated_data.pop('categories')  # 카테고리 데이터 분리
+        categories_data = validated_data.pop('categories', [])  # 카테고리 데이터 분리
         restaurant = Restaurant.objects.create(**validated_data)  # 나머지 데이터로 레스토랑 생성
 
         # 카테고리 추가
@@ -47,7 +47,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
 
     # update 메서드: 기존 레스토랑을 수정할 때 카테고리와 연결을 처리
     def update(self, instance, validated_data):
-        categories_data = validated_data.pop('categories')  # 카테고리 데이터 분리
+        categories_data = validated_data.pop('categories', [])  # 카테고리 데이터 분리
 
         # 필드별 업데이트
         instance.name = validated_data.get('name', instance.name)
@@ -56,6 +56,8 @@ class RestaurantSerializer(serializers.ModelSerializer):
         instance.contact = validated_data.get('contact', instance.contact)
         instance.distance_from_gate = validated_data.get('distance_from_gate', instance.distance_from_gate)
         instance.address = validated_data.get('address', instance.address)
+        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
+        instance.open_date = validated_data.get('open_date', instance.open_date)
         instance.save()
 
         # 카테고리 업데이트
