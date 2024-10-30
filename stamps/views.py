@@ -6,7 +6,33 @@ from rest_framework import status
 from .models import StampedPlace
 from .serializers import StampedPlaceSerializer
 from django.db.models import Count, F
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
+class StampedPlaceListView(generics.ListAPIView):
+    serializer_class = StampedPlaceSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        # 모든 장소의 도장 데이터 가져오기
+        return StampedPlace.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            # 인증되지 않은 사용자에 대해 `visit_count`를 -1로 설정하여 반환
+            anonymous_data = [{
+                "place_id": stamped_place.place.place_id,
+                "place": stamped_place.place.name,
+                "visit_count": -1,
+                "rating": stamped_place.rating,
+                "breaktime": stamped_place.breaktime,
+                "average_price": stamped_place.average_price,
+                "distance_from_gate": stamped_place.distance_from_gate,
+            } for stamped_place in self.get_queryset()]
+
+            return Response(anonymous_data, status=status.HTTP_200_OK)
+
+        # 인증된 사용자의 경우 모든 장소 데이터와 실제 방문 횟수를 반환
+        return super().list(request, *args, **kwargs)
 
 class RestaurantStampedPlaceListView(generics.ListAPIView):
     serializer_class = StampedPlaceSerializer
