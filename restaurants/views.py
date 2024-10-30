@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from .models import Restaurant
 from .serializers import RestaurantSerializer, RestaurantLocationSerializer
 from urllib.parse import unquote
-from django.db.models import Count
+from django.db.models import Count, F
+from rest_framework.permissions import AllowAny
 
 class RestaurantViewSet(viewsets.ModelViewSet):
     queryset = Restaurant.objects.all()  # 기본 전체 쿼리셋 설정
@@ -54,3 +55,37 @@ class RestaurantLocationView(generics.RetrieveAPIView):
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantLocationSerializer
     lookup_field = 'place_id'
+
+class FilteredRestaurantLocationView(generics.ListAPIView):
+    serializer_class = RestaurantLocationSerializer
+    permission_classes = [AllowAny]  # 비회원 접근 허용
+    def get_queryset(self):
+        queryset = Restaurant.objects.all()
+
+        # 방문 여부 필터링
+        visited = self.request.query_params.get('visited')
+        if visited == 'true':
+            queryset = queryset.filter(stampedplace__visit_count__gt=0)
+        elif visited == 'false':
+            queryset = queryset.filter(stampedplace__visit_count=0)
+
+        # 카테고리 필터링
+        category_id = self.request.query_params.get('category_id')
+        if category_id:
+            queryset = queryset.filter(categories__id=category_id)
+
+        # 정렬 조건
+        sort = self.request.query_params.get('sort')
+        if sort == 'rating_desc':
+            queryset = queryset.order_by(F('rating').desc(nulls_last=True))
+        elif sort == 'review_count_desc':
+            queryset = queryset.annotate(review_count=Count('reviews')).order_by('-review_count')
+        elif sort == 'open_date_asc':
+            queryset = queryset.order_by(F('open_date').asc(nulls_last=True))
+
+        return queryset.filter(latitude__isnull=False, longitude__isnull=False)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        data = self.get_serializer(queryset, many=True).data
+        return Response(data, status=status.HTTP_200_OK)

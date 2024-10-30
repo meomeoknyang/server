@@ -6,6 +6,7 @@ from .models import Cafe
 from .serializers import CafeSerializer, CafeLocationSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
+from django.db.models import F, Count
 
 class CafeViewSet(viewsets.ModelViewSet):
     queryset = Cafe.objects.all()  # 기본 전체 쿼리셋 설정
@@ -41,3 +42,37 @@ class CafeLocationView(generics.RetrieveAPIView):
     queryset = Cafe.objects.all()
     serializer_class = CafeLocationSerializer
     lookup_field = 'place_id'
+
+class FilteredCafeLocationView(generics.ListAPIView):
+    serializer_class = CafeLocationSerializer
+
+    def get_queryset(self):
+        queryset = Cafe.objects.all()
+
+        # 방문 여부 필터링
+        visited = self.request.query_params.get('visited')
+        if visited == 'true':
+            queryset = queryset.filter(stampedplace__visit_count__gt=0)
+        elif visited == 'false':
+            queryset = queryset.filter(stampedplace__visit_count=0)
+
+        # 카테고리 필터링
+        category_id = self.request.query_params.get('category_id')
+        if category_id:
+            queryset = queryset.filter(categories__id=category_id)
+
+        # 정렬 조건
+        sort = self.request.query_params.get('sort')
+        if sort == 'rating_desc':
+            queryset = queryset.order_by(F('rating').desc(nulls_last=True))
+        elif sort == 'review_count_desc':
+            queryset = queryset.annotate(review_count=Count('reviews')).order_by('-review_count')
+        elif sort == 'open_date_asc':
+            queryset = queryset.order_by(F('open_date').asc(nulls_last=True))
+
+        return queryset.filter(latitude__isnull=False, longitude__isnull=False)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        data = self.get_serializer(queryset, many=True).data
+        return Response(data, status=status.HTTP_200_OK)
