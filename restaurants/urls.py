@@ -1,17 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import RestaurantViewSet, RestaurantDetailView, RestaurantLocationView
-
-# DRF의 DefaultRouter 생성
-router = DefaultRouter()
-router.register(r'restaurants', RestaurantViewSet)
+from .views import RestaurantViewSet, RestaurantDetailView, RestaurantLocationView, FilteredRestaurantLocationView
 
 urlpatterns = [
-    path('', include(router.urls)),  # 라우터의 URL 패턴 포함
-
-    # place_id로 단일 조회
-    path('restaurants/<int:place_id>/', RestaurantDetailView.as_view(), name='restaurant-detail'),
-    #GET /restaurants/<place_id>/ 
-
-    path('restaurants/<int:place_id>/location/', RestaurantLocationView.as_view(), name='restaurant-location'),
+    path('restaurants/', RestaurantViewSet.as_view({'get': 'list', 'post': 'create'}), name='restaurant-list'),
+    path('restaurants/<int:pk>/', RestaurantViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='restaurant-detail'),
+    path('restaurants/<int:place_id>/location/', RestaurantLocationView.as_view(), name='restaurant-location'),  # 단일 위치 조회
+    path('restaurants/locations/', FilteredRestaurantLocationView.as_view(), name='filtered-restaurant-locations'),  # 여러 위치 필터링 조회
 ]

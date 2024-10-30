@@ -7,7 +7,7 @@ from django.db.models import Avg, Count
 class RestaurantLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
-        fields = ['place_id', 'latitude', 'longitude']
+        fields = ['place_id','name', 'latitude', 'longitude']
 
 class CategorySerializer(serializers.ModelSerializer):
     '''
@@ -50,8 +50,8 @@ class RestaurantSerializer(serializers.ModelSerializer):
         model = Restaurant
         fields = [
             'place_id', 'name', 'categories', 'opening_hours', 'image_url', 'contact',
-            'distance_from_gate', 'address', 'phone_number', 'open_date', 'menus', 'average_rating',
-            'keywords', 'comments', 'departments'
+            'distance_from_gate', 'address', 'phone_number', 'open_date', 'departments', 
+            'operating_hours', 'break_times', 'menus', 'average_rating', 'keywords', 'comments'
         ]
 
     # create 메서드: 카테고리를 처리하여 새 레스토랑을 생성

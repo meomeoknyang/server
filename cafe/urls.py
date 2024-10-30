@@ -1,15 +1,11 @@
 # cafe/urls.py
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import CafeViewSet, CafeDetailView, CafeLocationView
-
-# DRF의 DefaultRouter 생성
-router = DefaultRouter()
-router.register(r'cafes', CafeViewSet)
+from .views import CafeViewSet, CafeDetailView, CafeLocationView, FilteredCafeLocationView
 
 urlpatterns = [
-    path('', include(router.urls)),  # 라우터의 URL 패턴 포함
+    path('cafes/', CafeViewSet.as_view({'get': 'list', 'post': 'create'}), name='cafe-list'),
     # place_id로 단일 조회
     path('cafes/<int:place_id>/', CafeDetailView.as_view(), name='cafe-detail'),
     path('cafes/<int:place_id>/location/', CafeLocationView.as_view(), name='cafe-location'),
+    path('cafes/locations/', FilteredCafeLocationView.as_view(), name='filtered-cafe-locations'),
 ]

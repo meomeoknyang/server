@@ -9,7 +9,7 @@ from django.db.models import Avg, Count
 class CafeLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cafe
-        fields = ['place_id', 'latitude', 'longitude']
+        fields = ['place_id','name', 'latitude', 'longitude']
 
 class CafeCategorySerializer(serializers.ModelSerializer):
     '''
