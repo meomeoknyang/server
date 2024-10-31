@@ -26,6 +26,7 @@ class MenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
         fields = ['id', 'name', 'price', 'description', 'image_url', 'is_special']
+        ref_name = "CafeMenu"
 
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(source='user.nickname')  # 닉네임
@@ -42,7 +43,7 @@ class CafeSerializer(serializers.ModelSerializer):
     '''
     categories = CafeCategorySerializer(many=True)  # 카테고리: Many-to-Many 관계
     departments = serializers.StringRelatedField(many=True)
-    operating_hours = OperatingHoursSerializer(many=True, read_only=True)
+    # operating_hours = OperatingHoursSerializer(many=True, read_only=True)
     break_times = BreakTimeSerializer(many=True, read_only=True)
     menus = MenuSerializer(many=True, read_only=True)
     average_rating = serializers.SerializerMethodField()
@@ -54,7 +55,7 @@ class CafeSerializer(serializers.ModelSerializer):
         fields = [
             'place_id', 'name', 'categories', 'opening_hours', 'image_url', 'contact',
             'distance_from_gate', 'address', 'phone_number', 'open_date', 'departments', 
-            'operating_hours', 'break_times', 'menus', 'average_rating', 'keywords', 'comments'
+            'break_times', 'menus', 'average_rating', 'keywords', 'comments'
         ]
 
     def create(self, validated_data):

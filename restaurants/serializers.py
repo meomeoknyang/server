@@ -3,6 +3,7 @@ from .models import Restaurant, Category
 from baseplace.models import Menu
 from reviews.models import Review
 from django.db.models import Avg, Count
+from baseplace.serializers import BreakTimeSerializer
 
 class RestaurantLocationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,6 +25,7 @@ class MenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
         fields = ['id', 'name', 'price', 'description', 'image_url', 'is_special']  # 메뉴 관련 필드 반환
+        ref_name = "RestaurantMenu"  # 추가된 ref_name
 
 class CommentSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(source='user.nickname')  # 닉네임
@@ -46,12 +48,13 @@ class RestaurantSerializer(serializers.ModelSerializer):
     keywords = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
     departments = serializers.StringRelatedField(many=True)
+    break_times = BreakTimeSerializer(many=True, read_only=True)
     class Meta:
         model = Restaurant
         fields = [
             'place_id', 'name', 'categories', 'opening_hours', 'image_url', 'contact',
             'distance_from_gate', 'address', 'phone_number', 'open_date', 'departments', 
-            'operating_hours', 'break_times', 'menus', 'average_rating', 'keywords', 'comments'
+            'break_times', 'menus', 'average_rating', 'keywords', 'comments'
         ]
 
     # create 메서드: 카테고리를 처리하여 새 레스토랑을 생성
