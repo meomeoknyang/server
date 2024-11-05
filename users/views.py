@@ -34,8 +34,8 @@ class UserRegistrationView(APIView):
                 status_text="error",
                 message="알 수 없는 오류가 발생했습니다.",
                 code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                # data={"error": str(e)}
-                data = None
+                data={"error": str(e)}
+                # data = None
             )
 # class UserDetailView(generics.RetrieveAPIView):
 #     queryset = CustomUser.objects.all()

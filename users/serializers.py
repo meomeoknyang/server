@@ -10,7 +10,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('user_id', 'nickname', 'email', 'password', 'password_confirm', 'department', 'title')
+        fields = ('user_id', 'name', 'nickname', 'email', 'password', 'password_confirm', 'department', 'title')
 
     def validate(self, data):
         if data['password'] != data['password_confirm']:
@@ -19,7 +19,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password_confirm')
-        user = CustomUser.objects.create_user(**validated_data)
+        validated_data['username'] = validated_data['user_id']
+        password = validated_data.pop('password')
+        user = CustomUser(**validated_data)
+        user.set_password(password)  # 비밀번호 해싱
+        user.save()
         return user
 
 class RecentStampSerializer(serializers.Serializer):
@@ -37,5 +41,14 @@ class CustomUserSerializer(serializers.ModelSerializer):
         fields = ('id', 'user_id', 'username', 'nickname', 'name', 'email', 'department', 'title', 'recent_stamp_places')
 
     def get_recent_stamp_places(self, obj):
-        recent_stamps = obj.get_recent_stamps()  # 최근 도장 정보 가져오기
-        return RecentStampSerializer(recent_stamps, many=True).data
+        recent_stamps = obj.get_recent_stamps()
+        
+        # 각각의 리스트를 개별적으로 직렬화
+        restaurants = RecentStampSerializer(recent_stamps['restaurants'], many=True).data
+        cafes = RecentStampSerializer(recent_stamps['cafes'], many=True).data
+        
+        # 두 결과를 합쳐서 반환
+        return {
+            "restaurants": restaurants,
+            "cafes": cafes,
+        }
