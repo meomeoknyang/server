@@ -26,6 +26,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user  # 토큰에서 가져온 사용자 정보 할당
         keywords_data = validated_data.pop('keywords')  # 키워드 데이터 분리
         review = Review.objects.create(**validated_data)  # 리뷰 생성
 
