@@ -28,6 +28,8 @@ class CustomUser(AbstractUser):
     recent_stamp_object_id = models.PositiveIntegerField(null=True)
     recent_stamp_places = GenericForeignKey('recent_stamp_content_type', 'recent_stamp_object_id')
 
+    USERNAME_FIELD = 'user_id'  # Django 인증에 user_id를 사용
+    REQUIRED_FIELDS = []  # 다른 필드를 필수로 설정하지 않음
 
     def __str__(self):
         return self.nickname
