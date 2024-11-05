@@ -3,7 +3,8 @@ from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from reviews.models import Review
 from .models import StampedPlace
-from baseplace.models import BasePlace
+from cafe.models import Cafe
+from restaurants.models import Restaurant
 
 User = get_user_model()
 
@@ -26,7 +27,7 @@ def increase_visit_count(sender, instance, created, **kwargs):
 def create_stampplaces_for_new_user(sender, instance, created, **kwargs):
     if created:  # 유저가 처음 생성된 경우에만
         # 모든 BasePlace 하위 클래스의 인스턴스를 가져옴
-        all_places = BasePlace.objects.all()
+        all_places = list(Cafe.objects.all()) + list(Restaurant.objects.all())
 
         # 각 장소에 대해 StampPlace를 생성 (방문 횟수 0으로 초기화)
         for place in all_places:
