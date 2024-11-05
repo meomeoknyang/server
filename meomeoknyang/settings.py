@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "cafe",
     "stamps",
     "drf_yasg",
+    'django_extensions',
 ]
 
 from datetime import timedelta
