@@ -1,12 +1,13 @@
 from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserRegistrationSerializer
+from .serializers import UserRegistrationSerializer, CustomTokenObtainPairSerializer
 from .models import CustomUser
 from .serializers import CustomUserSerializer
 from rest_framework.permissions import IsAuthenticated
 from meomeoknyang.responses import CustomResponse
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 class UserRegistrationView(APIView):
 
@@ -110,4 +111,32 @@ class UserProfileView(APIView):
 # class UserUpdateView(APIView):
 #     permission_classes = [IsAuthenticated]  # 로그인된 사용자만 접근 가능
 
-    
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            response_data = serializer.validated_data
+            return CustomResponse(
+                status_text=response_data['status'],
+                message=response_data['message'],
+                code=response_data['code'],
+                data=response_data['data']
+            )
+        except Exception as e:
+            # 인증 오류에 대한 메시지 처리
+            if str(e) == "No active account found with the given credentials":
+                return CustomResponse(
+                    status_text="error",
+                    message="아이디 또는 비밀번호가 올바르지 않습니다.",
+                    code=status.HTTP_401_UNAUTHORIZED,
+                    data=None
+                )
+            return CustomResponse(
+                status_text="error",
+                message="로그인 중 알 수 없는 오류가 발생했습니다.",
+                code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                data={"error": str(e)}
+            )

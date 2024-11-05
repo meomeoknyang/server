@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from .models import CustomUser
 from django.contrib.auth.password_validation import validate_password
-from restaurants.serializers import RestaurantSerializer
-from cafe.serializers import CafeSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework import status
+from meomeoknyang.responses import CustomResponse
+from rest_framework.exceptions import AuthenticationFailed
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -51,4 +53,22 @@ class CustomUserSerializer(serializers.ModelSerializer):
         return {
             "restaurants": restaurants,
             "cafes": cafes,
+        }
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username_field = 'user_id'
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        refresh = self.get_token(self.user)
+
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+
+        # 데이터 형식을 JSON 직렬화 가능하도록 반환
+        return {
+            "status": "success",
+            "message": "로그인 성공",
+            "code": status.HTTP_200_OK,
+            "data": data
         }
