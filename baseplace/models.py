@@ -18,7 +18,6 @@ class BasePlace(models.Model):
     """
     place_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)  # 장소 이름
-    opening_hours = models.CharField(max_length=255)  # 운영 시간
     image_url = models.URLField(max_length=500, blank=True, null=True)  # 대표 이미지 URL
     contact = models.CharField(max_length=15, blank=True, null=True)  # 연락처
     address = models.CharField(max_length=255, blank=True, null=True)  # 주소
@@ -36,33 +35,33 @@ class BasePlace(models.Model):
     def __str__(self):
         return self.name
 
-class OperatingHours(models.Model):
-    """
-    요일별 운영 시간을 관리하는 모델
-    """
-    DAYS_OF_WEEK = [
-        ('Mon', '월요일'),
-        ('Tue', '화요일'),
-        ('Wed', '수요일'),
-        ('Thu', '목요일'),
-        ('Fri', '금요일'),
-        ('Sat', '토요일'),
-        ('Sun', '일요일'),
-    ]
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # 참조할 모델의 타입
-    object_id = models.PositiveIntegerField()  # 참조할 모델의 ID
-    place = GenericForeignKey('content_type', 'object_id')  # 참조할 모델
-    # place = models.ForeignKey(BasePlace, related_name='operating_hours', on_delete=models.CASCADE)
+# class OperatingHours(models.Model):
+#     """
+#     요일별 운영 시간을 관리하는 모델
+#     """
+#     DAYS_OF_WEEK = [
+#         ('Mon', '월요일'),
+#         ('Tue', '화요일'),
+#         ('Wed', '수요일'),
+#         ('Thu', '목요일'),
+#         ('Fri', '금요일'),
+#         ('Sat', '토요일'),
+#         ('Sun', '일요일'),
+#     ]
+#     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)  # 참조할 모델의 타입
+#     object_id = models.PositiveIntegerField()  # 참조할 모델의 ID
+#     place = GenericForeignKey('content_type', 'object_id')  # 참조할 모델
+#     # place = models.ForeignKey(BasePlace, related_name='operating_hours', on_delete=models.CASCADE)
 
-    day = models.CharField(max_length=3, choices=DAYS_OF_WEEK)  # 요일
-    start_time = models.TimeField()  # 운영 시작 시간
-    end_time = models.TimeField()  # 운영 종료 시간
+#     day = models.CharField(max_length=3, choices=DAYS_OF_WEEK)  # 요일
+#     start_time = models.TimeField()  # 운영 시작 시간
+#     end_time = models.TimeField()  # 운영 종료 시간
 
-    class Meta:
-        unique_together = ('content_type', 'object_id', 'day')
+#     class Meta:
+#         unique_together = ('content_type', 'object_id', 'day')
 
-    def __str__(self):
-        return f"{self.place.name} - {self.get_day_display()}: {self.start_time} ~ {self.end_time}"
+#     def __str__(self):
+#         return f"{self.place.name} - {self.get_day_display()}: {self.start_time} ~ {self.end_time}"
 
 
 class BreakTime(models.Model):
@@ -73,12 +72,12 @@ class BreakTime(models.Model):
     object_id = models.PositiveIntegerField()
     place = GenericForeignKey('content_type', 'object_id')
 
-    day = models.CharField(max_length=3, choices=OperatingHours.DAYS_OF_WEEK)  # 요일
+    # day = models.CharField(max_length=3, choices=OperatingHours.DAYS_OF_WEEK)  # 요일
     start_time = models.TimeField()  # 브레이크 시작 시간
     end_time = models.TimeField()  # 브레이크 종료 시간
 
     class Meta:
-        unique_together = ('content_type', 'object_id', 'day')
+        unique_together = ('content_type', 'object_id')
 
     def __str__(self):
         return f"{self.place.name} - {self.get_day_display()}: {self.start_time} ~ {self.end_time}"

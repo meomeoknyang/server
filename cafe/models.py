@@ -1,7 +1,7 @@
 # cafe/models.py
 import uuid
 from django.db import models
-from baseplace.models import BasePlace, Department, OperatingHours, BreakTime
+from baseplace.models import BasePlace, Department, BreakTime
 from restaurants.models import Category
 
 class CafeCategory(models.Model):
@@ -26,8 +26,7 @@ class Cafe(BasePlace):
     """
     categories = models.ManyToManyField(CafeCategory, related_name='cafes')  # 카페 카테고리
     departments = models.ManyToManyField(Department, related_name='affiliated_cafes')  # 제휴 학과
-    operating_hours = models.ManyToManyField(OperatingHours, related_name='cafe_operating_hours')
-    break_times = models.ManyToManyField(BreakTime, related_name='cafe_break_times')
+    break_times = models.ManyToManyField(BreakTime, related_name='cafe_break_times', blank=True)
 
     def __str__(self):
         return self.name

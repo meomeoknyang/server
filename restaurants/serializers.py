@@ -52,10 +52,23 @@ class RestaurantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
         fields = [
-            'place_id', 'name', 'categories', 'opening_hours', 'image_url', 'contact',
+            'place_id', 'name', 'categories', 'image_url', 'contact',
             'distance_from_gate', 'address', 'phone_number', 'open_date', 'departments', 
             'break_times', 'menus', 'average_rating', 'keywords', 'comments'
         ]
+        extra_kwargs = {
+            'image_url': {'required': False, 'allow_null': True},
+            'contact': {'required': False, 'allow_null': True},
+            'distance_from_gate': {'required': False, 'allow_null': True},
+            'address': {'required': False, 'allow_null': True},
+            'phone_number': {'required': False, 'allow_null': True},
+            'departments': {'required': False, 'allow_null': True},
+            'break_times': {'required': False, 'allow_null': True},
+            'menus': {'required': False, 'allow_null': True},
+            'average_rating': {'required': False, 'allow_null': True},
+            'keywords': {'required': False, 'allow_null': True},
+            'comments': {'required': False, 'allow_null': True},
+        }
 
     # create 메서드: 카테고리를 처리하여 새 레스토랑을 생성
     def create(self, validated_data):
@@ -75,7 +88,6 @@ class RestaurantSerializer(serializers.ModelSerializer):
 
         # 필드별 업데이트
         instance.name = validated_data.get('name', instance.name)
-        instance.opening_hours = validated_data.get('opening_hours', instance.opening_hours)
         instance.image_url = validated_data.get('image_url', instance.image_url)
         instance.contact = validated_data.get('contact', instance.contact)
         instance.distance_from_gate = validated_data.get('distance_from_gate', instance.distance_from_gate)
@@ -96,16 +108,22 @@ class RestaurantSerializer(serializers.ModelSerializer):
         return MenuSerializer(obj.menus.all()[:5], many=True).data  # 최대 5개의 메뉴 반환
 
     def get_average_rating(self, obj):
-        return obj.reviews.aggregate(avg_rating=Avg('rating'))['avg_rating']  # 평균 평점
-
+        # 평균 평점 계산
+        average_rating = Review.objects.filter(
+            content_type__model='restaurant', object_id=obj.place_id
+        ).aggregate(average=Avg('rating'))['average']
+        return average_rating if average_rating is not None else -1
+    
     def get_keywords(self, obj):
+        # Review 모델을 통해 Restaurant 관련 키워드 조회
         return (
-            obj.reviews.values('keywords__description')
+            Review.objects.filter(content_type__model='restaurant', object_id=obj.place_id)
+            .values('keywords__description')
             .annotate(count=Count('keywords'))
             .order_by('-count')
         )
-
+    
     def get_comments(self, obj):
-        latest_reviews = obj.reviews.order_by('-created_at')[:3]
+        # Review 모델을 통해 Restaurant 관련 리뷰 조회
+        latest_reviews = Review.objects.filter(content_type__model='restaurant', object_id=obj.place_id).order_by('-created_at')[:3]
         return CommentSerializer(latest_reviews, many=True).data  # 최근 3개의 코멘트 반환
-

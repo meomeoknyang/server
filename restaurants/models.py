@@ -1,5 +1,5 @@
 from django.db import models
-from baseplace.models import BasePlace, Department
+from baseplace.models import BasePlace, Department, BreakTime
 import uuid
 
 class Category(models.Model):
@@ -53,7 +53,7 @@ class Restaurant(BasePlace):
     """
     categories = models.ManyToManyField(Category, related_name='restaurants')
     departments = models.ManyToManyField(Department, related_name='affiliated_restaurants')  # 제휴 학과
-
+    break_times = models.ManyToManyField(BreakTime, related_name='restaurants_break_times', blank=True)
     def __str__(self):
         return self.name
     
