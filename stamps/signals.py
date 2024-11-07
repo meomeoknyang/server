@@ -34,21 +34,21 @@ def create_stampplaces_for_new_user(sender, instance, created, **kwargs):
         for place in all_places:
             StampedPlace.objects.create(user=instance, place_id=place.place_id, visit_count=0)
 
-@receiver(post_save, sender=Cafe)
-def create_stampedplace_for_cafe(sender, instance, created, **kwargs):
-    if created:
-        StampedPlace.objects.get_or_create(
-                content_type=ContentType.objects.get_for_model(Cafe),
-                object_id=instance.place_id,
-                defaults={'visit_count': 0}
-            )
+# @receiver(post_save, sender=Cafe)
+# def create_stampedplace_for_cafe(sender, instance, created, **kwargs):
+#     if created:
+#         StampedPlace.objects.get_or_create(
+#                 content_type=ContentType.objects.get_for_model(Cafe),
+#                 object_id=instance.place_id,
+#                 defaults={'visit_count': 0}
+#             )
 
-# Restaurant 생성 시 StampedPlace 생성
-@receiver(post_save, sender=Restaurant)
-def create_stampedplace_for_restaurant(sender, instance, created, **kwargs):
-    if created:
-        StampedPlace.objects.get_or_create(
-                content_type=ContentType.objects.get_for_model(Restaurant),
-                object_id=instance.place_id,
-                defaults={'visit_count': 0}
-            )
+# # Restaurant 생성 시 StampedPlace 생성
+# @receiver(post_save, sender=Restaurant)
+# def create_stampedplace_for_restaurant(sender, instance, created, **kwargs):
+#     if created:
+#         StampedPlace.objects.get_or_create(
+#                 content_type=ContentType.objects.get_for_model(Restaurant),
+#                 object_id=instance.place_id,
+#                 defaults={'visit_count': 0}
+#             )
