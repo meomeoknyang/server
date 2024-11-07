@@ -1,9 +1,9 @@
 # stamps/urls.py
 from django.urls import path
-from .views import StampedPlaceListView, StampedPlaceTypeListView
+from .views import  StampedPlaceTypeListView
 
 urlpatterns = [
-    path('stamps/', StampedPlaceListView.as_view(), name='stampedplace-list'),
+    path('stamps/', StampedPlaceTypeListView.as_view(), name='stampedplace-list'),
     path('stamps/<str:place_type>/', StampedPlaceTypeListView.as_view(), name='stamped-place-type-list'),
 ]
 
