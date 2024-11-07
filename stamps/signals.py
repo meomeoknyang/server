@@ -5,6 +5,7 @@ from reviews.models import Review
 from .models import StampedPlace
 from cafe.models import Cafe
 from restaurants.models import Restaurant
+from django.contrib.contenttypes.models import ContentType
 
 User = get_user_model()
 
@@ -32,3 +33,22 @@ def create_stampplaces_for_new_user(sender, instance, created, **kwargs):
         # 각 장소에 대해 StampPlace를 생성 (방문 횟수 0으로 초기화)
         for place in all_places:
             StampedPlace.objects.create(user=instance, place_id=place.place_id, visit_count=0)
+
+# @receiver(post_save, sender=Cafe)
+# def create_stampedplace_for_cafe(sender, instance, created, **kwargs):
+#     if created:
+#         StampedPlace.objects.get_or_create(
+#                 content_type=ContentType.objects.get_for_model(Cafe),
+#                 object_id=instance.place_id,
+#                 defaults={'visit_count': 0}
+#             )
+
+# # Restaurant 생성 시 StampedPlace 생성
+# @receiver(post_save, sender=Restaurant)
+# def create_stampedplace_for_restaurant(sender, instance, created, **kwargs):
+#     if created:
+#         StampedPlace.objects.get_or_create(
+#                 content_type=ContentType.objects.get_for_model(Restaurant),
+#                 object_id=instance.place_id,
+#                 defaults={'visit_count': 0}
+#             )

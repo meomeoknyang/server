@@ -16,8 +16,8 @@ class StampedPlaceSerializer(serializers.ModelSerializer):
         return obj.place.place_id  # `place` 필드에서 ID를 추출하여 반환
     
     def get_category(self, obj):
-        if obj.content_type.model == 'restaurant':
-            return RestaurantCategorySerializer(obj.place.categories, many=True).data
-        elif obj.content_type.model == 'cafe':
-            return CafeCategorySerializer(obj.place.categories, many=True).data
+        if obj.category_content_type.model == 'cafecategory':
+            return CafeCategorySerializer(obj.category).data
+        elif obj.category_content_type.model == 'category':  # restaurants.Category
+            return RestaurantCategorySerializer(obj.category).data
         return None

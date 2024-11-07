@@ -9,6 +9,11 @@ class StampedPlace(models.Model):
     object_id = models.PositiveIntegerField()
     place = GenericForeignKey('content_type', 'object_id')
     
+    # 카테고리를 위한 GenericForeignKey 추가
+    category_content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, related_name='stamped_place_categories')
+    category_object_id = models.PositiveIntegerField(null=True)
+    category = GenericForeignKey('category_content_type', 'category_object_id')
+
     visit_count = models.PositiveIntegerField(default=0)
     rating = models.FloatField(null=True, blank=True)  # 별점 평균 (리뷰에서 계산해서 저장)
     breaktime = models.CharField(max_length=100, blank=True, null=True)  # 장소의 브레이크 타임 정보
