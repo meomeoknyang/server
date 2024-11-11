@@ -23,7 +23,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         # fields = ['restaurant', 'rating', 'keywords', 'comment', 'images', 'created_at']
         fields = [
-            'id', 'place', 'user', 'rating', 'comment', 'keywords', 'created_at', 'images', 'visit_count', 'place_type', 'place_id'
+            'id', 'place', 'user', 'rating', 'comment', 'keywords', 'created_at', 'images', 'visit_count'
         ]
 
     def create(self, validated_data):

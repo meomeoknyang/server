@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "cafe",
     "stamps",
     "drf_yasg",
+    "search"
 ]
 
 from datetime import timedelta
