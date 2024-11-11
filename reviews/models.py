@@ -24,13 +24,13 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  # 리뷰 작성 날짜
     visit_count = models.PositiveIntegerField(default=1) # 방문 횟수
     # GenericForeignKey를 사용하여 BasePlace 상속 모델과의 관계 정의
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
-    object_id = models.PositiveIntegerField()
-    place = GenericForeignKey('content_type', 'object_id')
+    place_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    place_id = models.PositiveIntegerField()
+    place = GenericForeignKey('place_type', 'place_id')
 
     def save(self, *args, **kwargs):
         # 사용자가 특정 장소에 남긴 리뷰 중 가장 높은 visit_count 값을 가져옴
-        last_visit = Review.objects.filter(user=self.user, content_type=self.content_type, object_id=self.object_id).aggregate(last_visit=Max('visit_count'))['last_visit']
+        last_visit = Review.objects.filter(user=self.user, content_type=self.place_type, object_id=self.place_id).aggregate(last_visit=Max('visit_count'))['last_visit']
         # 이전 방문이 있다면 visit_count 증가
         self.visit_count = (last_visit or 0) + 1
         super().save(*args, **kwargs)  # 기존 save() 메서드 호출하여 저장
