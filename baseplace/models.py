@@ -94,4 +94,7 @@ class Menu(models.Model):
     is_special = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.name} - {self.place.name}"
+        place_name = getattr(self.place, 'name', None)
+        if place_name:
+            return f"{self.name} - {place_name}"
+        return self.name

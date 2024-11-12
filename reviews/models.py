@@ -36,11 +36,11 @@ class Review(models.Model):
         super().save(*args, **kwargs)  # 기존 save() 메서드 호출하여 저장
 
     def __str__(self):
-        return f"{self.place.name} - {self.rating} - 방문 {self.visit_count}회"
+        return f"{self.place} - {self.rating} - 방문 {self.visit_count}회"
 
 class ReviewImage(models.Model):
     review = models.ForeignKey(Review, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='review_images/')
 
     def __str__(self):
-        return f"Image for {self.review.place.name} review"
+        return f"Image for {self.review.place} review"

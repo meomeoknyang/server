@@ -11,7 +11,7 @@ from reviews.models import Review, Keyword
 class BreakTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = BreakTime
-        fields = ['day', 'start_time', 'end_time']
+        fields = ['start_time', 'end_time']
 
 class MenuSerializer(serializers.ModelSerializer):
     class Meta:
