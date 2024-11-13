@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 
-
+import os
 from django.core.exceptions import ImproperlyConfigured 
 
 def get_env_variable(var_name):
@@ -31,7 +31,7 @@ def get_env_variable(var_name):
     error_msg = 'Set the {} environment variable'.format(var_name)
     raise ImproperlyConfigured(error_msg)
 
-SECRET_KEY = get_env_variable('DJANGO_SECRET')
+SECRET_KEY= "django-insecure-m_44p4i#hf^k*0tq_l^o_3r4rw!0888-3an4svn-q3v22-!k3g"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -122,7 +122,6 @@ WSGI_APPLICATION = "meomeoknyang.wsgi.application"
 #     }
 # }
 
-import os
 from dotenv import load_dotenv
 
 # .env 파일 로드
@@ -130,18 +129,18 @@ load_dotenv()
 
 DATABASES = {
     'default': {
-        # 'ENGINE': os.getenv('DB_ENGINE'),
-        # 'NAME': os.getenv('DB_NAME'),
-        # 'USER': os.getenv('DB_USER'),
-        # 'PASSWORD': os.getenv('DB_PASSWORD'),
-        # 'HOST': os.getenv('DB_HOST'),
-        # 'PORT': os.getenv('DB_PORT'),
-        'ENGINE': 'django.db.backends.postgresql',
-		'NAME': get_env_variable('DB_NAME'),
-        'USER': get_env_variable('DB_USER'),
-        'PASSWORD': get_env_variable('DB_PASSWORD'),
-        'HOST': get_env_variable('DB_HOST'),
-        'PORT': get_env_variable('DB_PORT'),
+        'ENGINE': os.getenv('DB_ENGINE'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
+        # 'ENGINE': 'django.db.backends.postgresql',
+		# 'NAME': get_env_variable('DB_NAME'),
+        # 'USER': get_env_variable('DB_USER'),
+        # 'PASSWORD': get_env_variable('DB_PASSWORD'),
+        # 'HOST': get_env_variable('DB_HOST'),
+        # 'PORT': get_env_variable('DB_PORT'),
     }
 }
 
