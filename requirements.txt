@@ -7,7 +7,10 @@ drf-yasg==1.21.8
 inflection==0.5.1
 packaging==24.1
 pillow==11.0.0
+psycopg==3.2.3
+psycopg2==2.9.10
 PyJWT==2.9.0
+python-dotenv==1.0.1
 pytz==2024.2
 PyYAML==6.0.2
 sqlparse==0.5.1
