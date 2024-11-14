@@ -34,7 +34,7 @@ def get_env_variable(var_name):
 SECRET_KEY= get_env_variable('DJANGO_SECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 

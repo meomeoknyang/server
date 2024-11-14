@@ -49,12 +49,13 @@ class RestaurantSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField()
     departments = serializers.StringRelatedField(many=True)
     break_times = BreakTimeSerializer(many=True, read_only=True)
+    average_price = serializers.SerializerMethodField()
     class Meta:
         model = Restaurant
         fields = [
             'place_id', 'name', 'categories', 'image_url', 'contact',
             'distance_from_gate', 'address', 'phone_number', 'open_date', 'departments', 
-            'break_times', 'menus', 'average_rating', 'keywords', 'comments'
+            'break_times', 'menus', 'average_rating', 'keywords', 'comments', 'average_price'
         ]
         extra_kwargs = {
             'image_url': {'required': False, 'allow_null': True},
@@ -68,6 +69,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'average_rating': {'required': False, 'allow_null': True},
             'keywords': {'required': False, 'allow_null': True},
             'comments': {'required': False, 'allow_null': True},
+            'averate_price': {'required': False, 'allow_null': True},
         }
 
     # create 메서드: 카테고리를 처리하여 새 레스토랑을 생성
@@ -127,3 +129,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
         # Review 모델을 통해 Restaurant 관련 리뷰 조회
         latest_reviews = Review.objects.filter(content_type__model='restaurant', object_id=obj.place_id).order_by('-created_at')[:3]
         return CommentSerializer(latest_reviews, many=True).data  # 최근 3개의 코멘트 반환
+            
+    # 평균 가격 가져오기 메서드
+    def get_average_price(self, obj):
+        return obj.average_price if obj.average_price is not None else 0  # 평균 가격이 없으면 기본값 0 반환

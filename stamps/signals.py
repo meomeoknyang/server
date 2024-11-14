@@ -30,9 +30,17 @@ def create_stampplaces_for_new_user(sender, instance, created, **kwargs):
         # 모든 BasePlace 하위 클래스의 인스턴스를 가져옴
         all_places = list(Cafe.objects.all()) + list(Restaurant.objects.all())
 
-        # 각 장소에 대해 StampPlace를 생성 (방문 횟수 0으로 초기화)
+        # 각 장소에 대해 StampedPlace를 생성 (방문 횟수 0으로 초기화)
         for place in all_places:
-            StampedPlace.objects.create(user=instance, place_id=place.place_id, visit_count=0)
+            content_type = ContentType.objects.get_for_model(place)
+            StampedPlace.objects.create(
+                user=instance,
+                content_type=content_type,  # content_type 추가
+                object_id=place.place_id,   # object_id 추가
+                visit_count=0,
+                average_price=int(place.average_price),          # 기본값 설정
+                distance_from_gate=place.distance_from_gate  # 기본값 설정
+            )
 
 # @receiver(post_save, sender=Cafe)
 # def create_stampedplace_for_cafe(sender, instance, created, **kwargs):
