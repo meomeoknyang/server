@@ -38,7 +38,7 @@ def create_stampplaces_for_new_user(sender, instance, created, **kwargs):
                 content_type=content_type,  # content_type 추가
                 object_id=place.place_id,   # object_id 추가
                 visit_count=0,
-                average_price=int(place.average_price),          # 기본값 설정
+                average_price=place.average_price,          # 기본값 설정
                 distance_from_gate=place.distance_from_gate  # 기본값 설정
             )
 
