@@ -11,7 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 class UserRegistrationView(APIView):
 
-    @swagger_auto_schema(request_body=CustomUserSerializer)
+    @swagger_auto_schema(request_body=UserRegistrationSerializer)
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         try:
