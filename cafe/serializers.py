@@ -57,7 +57,7 @@ class CafeSerializer(serializers.ModelSerializer):
         fields = [
             'place_id', 'name', 'categories', 'image_url', 'contact',
             'distance_from_gate', 'address', 'phone_number', 'open_date', 'departments', 
-            'break_times', 'menus', 'average_rating', 'keywords', 'comments', 'averate_price'
+            'break_times', 'menus', 'average_rating', 'keywords', 'comments', 'average_price'
         ]
         extra_kwargs = {
             'image_url': {'required': False, 'allow_null': True},
@@ -71,7 +71,7 @@ class CafeSerializer(serializers.ModelSerializer):
             'average_rating': {'required': False, 'allow_null': True},
             'keywords': {'required': False, 'allow_null': True},
             'comments': {'required': False, 'allow_null': True},
-            'averate_price': {'required': False, 'allow_null': True},
+            'average_price': {'required': False, 'allow_null': True},
         }
 
     def create(self, validated_data):

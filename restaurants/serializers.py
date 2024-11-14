@@ -69,7 +69,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'average_rating': {'required': False, 'allow_null': True},
             'keywords': {'required': False, 'allow_null': True},
             'comments': {'required': False, 'allow_null': True},
-            'averate_price': {'required': False, 'allow_null': True},
+            'average_price': {'required': False, 'allow_null': True},
         }
 
     # create 메서드: 카테고리를 처리하여 새 레스토랑을 생성
