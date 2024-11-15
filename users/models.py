@@ -65,5 +65,7 @@ class CustomUser(AbstractUser):
     #     return self.recent_stamp_restaurants.order_by('-id')[:10]  # 최근 방문한 최대 10개 식당 반환
 
     def get_recent_stamps(self):
-        # 최근 방문한 장소
+        # recent_stamp_places가 None일 경우 빈 리스트 반환
+        if not self.recent_stamp_places:
+            return []
         return self.recent_stamp_places.all().order_by('-id')[:10]
