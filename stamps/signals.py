@@ -13,15 +13,20 @@ User = get_user_model()
 @receiver(post_save, sender=Review)
 def increase_visit_count(sender, instance, created, **kwargs):
     if created:  # 리뷰가 처음 생성된 경우에만
-        place = instance.place  # Review의 GenericForeignKey 필드에 연결된 place
+        # place = instance.place  # Review의 GenericForeignKey 필드에 연결된 place
         user = instance.user
-
-        # 해당 유저와 place에 대한 StampPlace 객체를 가져오거나 생성
-        stamp, created = StampedPlace.objects.get_or_create(user=user, place_id=place.place_id)
-        
-        # 방문 횟수 증가
-        stamp.visit_count += 1
-        stamp.save()
+        object_id = instance.object_id  # 바로 object_id를 사용
+        content_type = instance.content_type
+        # content_type과 object_id를 사용하여 StampedPlace 조회
+        stamp, created = StampedPlace.objects.get_or_create(
+            user=user,
+            content_type=content_type,
+            object_id=object_id
+        )
+       # visit_count 증가
+        if not created:
+            stamp.visit_count += 1
+            stamp.save()
 
 # 2. 회원가입 시 모든 StampPlace 생성
 @receiver(post_save, sender=User)

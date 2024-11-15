@@ -42,17 +42,33 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('id', 'user_id', 'username', 'nickname', 'name', 'email', 'department', 'title', 'recent_stamp_places')
 
+    # def get_recent_stamp_places(self, obj):
+    #     recent_stamps = obj.get_recent_stamps()
+        
+    #     # 각각의 리스트를 개별적으로 직렬화
+    #     restaurants = RecentStampSerializer(recent_stamps['restaurants'], many=True).data
+    #     cafes = RecentStampSerializer(recent_stamps['cafes'], many=True).data
+        
+    #     # 두 결과를 합쳐서 반환
+    #     return {
+    #         "restaurants": restaurants,
+    #         "cafes": cafes,
+    #     }
     def get_recent_stamp_places(self, obj):
-        recent_stamps = obj.get_recent_stamps()
-        
-        # 각각의 리스트를 개별적으로 직렬화
-        restaurants = RecentStampSerializer(recent_stamps['restaurants'], many=True).data
-        cafes = RecentStampSerializer(recent_stamps['cafes'], many=True).data
-        
-        # 두 결과를 합쳐서 반환
+    # 예외 처리로 get_recent_stamps() 호출 보장
+        try:
+            recent_stamps = obj.get_recent_stamps() or {}  # None일 경우 빈 dict로 초기화
+        except AttributeError:
+            recent_stamps = {"restaurants": [], "cafes": []}
+
+        # restaurants와 cafes를 개별적으로 직렬화
+        restaurants = recent_stamps.get('restaurants', [])
+        cafes = recent_stamps.get('cafes', [])
+
+        # 직렬화된 데이터 반환
         return {
-            "restaurants": restaurants,
-            "cafes": cafes,
+            "restaurants": RecentStampSerializer(restaurants, many=True).data,
+            "cafes": RecentStampSerializer(cafes, many=True).data,
         }
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

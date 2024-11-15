@@ -10,25 +10,28 @@ from users.models import CustomUser
 from meomeoknyang.responses import CustomResponse
 
 class ReviewListCreateView(generics.ListCreateAPIView):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    
-    def post(self, request, *args, **kwargs):
-        try:
-            response = super().post(request, *args, **kwargs)
-            return CustomResponse(
-                status_text="success",
-                message="리뷰가 성공적으로 생성되었습니다.",
-                code=status.HTTP_201_CREATED,
-                data=response.data
-            )
-        except Exception as e:
-            return CustomResponse(
-                status_text="error",
-                message="리뷰 생성 중 오류가 발생했습니다.",
-                code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data=None
-            )
+
+    def get_queryset(self):
+        place_type = self.kwargs['place_type']
+        place_id = self.kwargs['place_id']
+
+        if place_type == 'restaurant':
+            content_type = ContentType.objects.get(app_label='restaurants', model='restaurant')
+        elif place_type == 'cafe':
+            content_type = ContentType.objects.get(app_label='cafe', model='cafe')
+        else:
+            raise ValueError("Invalid 'place_type'. Must be 'restaurant' or 'cafe'.")
+
+        return Review.objects.filter(content_type=content_type, object_id=place_id)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({
+            'place_type': self.kwargs['place_type'],
+            'place_id': self.kwargs['place_id']
+        })
+        return context
         
 # 특정 사용자가 작성한 리뷰 전체 조회
 class UserReviewsView(APIView):
@@ -93,7 +96,7 @@ class PlaceReviewsView(APIView):
                 status_text="error",
                 message="리뷰 조회 중 알 수 없는 오류가 발생했습니다.",
                 code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data=None
+                data={"error": str(e)}
             )
 
 

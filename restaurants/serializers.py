@@ -4,6 +4,8 @@ from baseplace.models import Menu
 from reviews.models import Review
 from django.db.models import Avg, Count
 from baseplace.serializers import BreakTimeSerializer
+from stamps.models import StampedPlace
+from django.contrib.contenttypes.models import ContentType
 
 class RestaurantLocationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,12 +52,13 @@ class RestaurantSerializer(serializers.ModelSerializer):
     departments = serializers.StringRelatedField(many=True)
     break_times = BreakTimeSerializer(many=True, read_only=True)
     average_price = serializers.SerializerMethodField()
+    visit_count = serializers.SerializerMethodField()  # 사용자별 방문 횟수 추가
     class Meta:
         model = Restaurant
         fields = [
             'place_id', 'name', 'categories', 'image_url', 'contact',
             'distance_from_gate', 'address', 'phone_number', 'open_date', 'departments', 
-            'break_times', 'menus', 'average_rating', 'keywords', 'comments', 'average_price'
+            'break_times', 'menus', 'average_rating', 'keywords', 'comments', 'average_price', 'visit_count'
         ]
         extra_kwargs = {
             'image_url': {'required': False, 'allow_null': True},
@@ -133,3 +136,20 @@ class RestaurantSerializer(serializers.ModelSerializer):
     # 평균 가격 가져오기 메서드
     def get_average_price(self, obj):
         return obj.average_price if obj.average_price is not None else 0  # 평균 가격이 없으면 기본값 0 반환
+
+    def get_visit_count(self, obj):
+        """
+        현재 사용자와 특정 Restaurant 간의 방문 횟수 반환
+        """
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                stamped_place = StampedPlace.objects.get(
+                    user=user,
+                    content_type=ContentType.objects.get_for_model(Restaurant),
+                    object_id=obj.place_id
+                )
+                return stamped_place.visit_count
+            except StampedPlace.DoesNotExist:
+                return 0  # 방문 기록이 없는 경우
+        return -1  # 인증되지 않은 사용자
