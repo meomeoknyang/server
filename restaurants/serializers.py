@@ -45,7 +45,8 @@ class RestaurantSerializer(serializers.ModelSerializer):
     '''
     
     categories = CategorySerializer(many=True)  # 카테고리: Many-to-Many 관계
-    menus = MenuSerializer(many=True, read_only=True)  # 메뉴: ForeignKey로 연결, ReadOnly로 처리
+    # menus = MenuSerializer(many=True, read_only=True)  # 메뉴: ForeignKey로 연결, ReadOnly로 처리
+    menus = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
     keywords = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
@@ -110,8 +111,16 @@ class RestaurantSerializer(serializers.ModelSerializer):
         return instance
     
     def get_menus(self, obj):
-        return MenuSerializer(obj.menus.all()[:5], many=True).data  # 최대 5개의 메뉴 반환
-
+        """
+        Menu 데이터를 ContentType과 object_id를 통해 가져오는 메서드
+        """
+        try:
+            content_type = ContentType.objects.get_for_model(Restaurant)
+            menus = Menu.objects.filter(content_type=content_type, object_id=obj.place_id)
+            return MenuSerializer(menus, many=True).data
+        except ContentType.DoesNotExist:
+            return []
+        
     def get_average_rating(self, obj):
         # 평균 평점 계산
         average_rating = Review.objects.filter(
@@ -152,4 +161,4 @@ class RestaurantSerializer(serializers.ModelSerializer):
                 return stamped_place.visit_count
             except StampedPlace.DoesNotExist:
                 return 0  # 방문 기록이 없는 경우
-        return -1  # 인증되지 않은 사용자
+        return 0  # 인증되지 않은 사용자

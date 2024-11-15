@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from .models import Restaurant
 from .serializers import RestaurantSerializer, RestaurantLocationSerializer
 from urllib.parse import unquote
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from rest_framework.permissions import AllowAny
 from meomeoknyang.responses import CustomResponse
 from baseplace.models import Menu
@@ -20,11 +20,12 @@ class RestaurantViewSet(viewsets.ModelViewSet):
             queryset = self.get_queryset()
             
             # GET 요청에서 필터 조건 받아오기
-            category_ids = request.GET.getlist('categories')  # 여러 개의 카테고리 ID
+            category_ids = request.GET.getlist('categories')  # categories 파라미터에서 여러 ID 가져오기
+
             search_name = request.GET.get('name')  # 검색할 식당 이름
             menu_name = request.GET.get('menu_name')  # 메뉴 이름 검색
             visited = request.GET.get('visited')
-
+            
             if visited in ['true', 'false']:
                 # ContentType 가져오기
                 restaurant_content_type = ContentType.objects.get_for_model(Restaurant)
@@ -45,8 +46,17 @@ class RestaurantViewSet(viewsets.ModelViewSet):
 
 
             # 카테고리 필터링 (카테고리 ID가 전달된 경우)
+            # if category_ids:
+            #     queryset = queryset.filter(categories__id__in=category_ids)
+
             if category_ids:
-                queryset = queryset.filter(categories__id__in=category_ids)
+                # 카테고리 ID의 개수
+                num_categories = len(category_ids)
+
+                # 모든 카테고리를 포함하는 식당만 조회
+                queryset = queryset.filter(categories__id__in=category_ids) \
+                                .annotate(num_matching_categories=Count('categories', filter=Q(categories__id__in=category_ids))) \
+                                .filter(num_matching_categories=num_categories)
 
             # 이름 검색 필터링 (검색어가 전달된 경우)
             if search_name:

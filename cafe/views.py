@@ -44,9 +44,14 @@ class CafeViewSet(viewsets.ModelViewSet):
                 visited_place_ids = stamped_places.values_list('object_id', flat=True)
                 queryset = queryset.filter(place_id__in=visited_place_ids)
 
-            # 카테고리 필터링 (카테고리 ID가 전달된 경우)
             if category_ids:
-                queryset = queryset.filter(categories__id__in=category_ids)
+                # 카테고리 ID의 개수
+                num_categories = len(category_ids)
+
+                # 모든 카테고리를 포함하는 식당만 조회
+                queryset = queryset.filter(categories__id__in=category_ids) \
+                                .annotate(num_matching_categories=Count('categories', filter=Q(categories__id__in=category_ids))) \
+                                .filter(num_matching_categories=num_categories)
 
             # 이름 검색 필터링 (검색어가 전달된 경우)
             if search_name:
