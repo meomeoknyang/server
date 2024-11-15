@@ -72,7 +72,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # 토큰 유효기간 설정
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),  # 토큰 유효기간 설정
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
