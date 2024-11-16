@@ -94,7 +94,7 @@ class UserReviewsView(APIView):
                 status_text="error",
                 message="리뷰 조회 중 알 수 없는 오류가 발생했습니다.",
                 code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data=None
+                data=str(e)
             )
 
 
@@ -122,5 +122,5 @@ class ReviewDetailView(APIView):
                 status_text="error",
                 message="리뷰 조회 중 알 수 없는 오류가 발생했습니다.",
                 code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data=None
+                data=str(e)
             )

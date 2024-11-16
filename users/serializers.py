@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import CustomUser
+from stamps.models import StampedPlace
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import status
@@ -55,20 +56,18 @@ class CustomUserSerializer(serializers.ModelSerializer):
     #         "cafes": cafes,
     #     }
     def get_recent_stamp_places(self, obj):
-    # 예외 처리로 get_recent_stamps() 호출 보장
-        try:
-            recent_stamps = obj.get_recent_stamps() or {}  # None일 경우 빈 dict로 초기화
-        except AttributeError:
-            recent_stamps = {"restaurants": [], "cafes": []}
-
-        # restaurants와 cafes를 개별적으로 직렬화
-        restaurants = recent_stamps.get('restaurants', [])
-        cafes = recent_stamps.get('cafes', [])
-
-        # 직렬화된 데이터 반환
+    # 최근 방문 레코드를 가져오기 (visit_count를 기준으로 정렬)
+        restaurants = StampedPlace.objects.filter(
+            user=obj, content_type__model='restaurant'
+        ).order_by('-visit_count')[:5].values_list('object_id', flat=True)
+        
+        cafes = StampedPlace.objects.filter(
+            user=obj, content_type__model='cafe'
+        ).order_by('-visit_count')[:5].values_list('object_id', flat=True)
+        
         return {
-            "restaurants": RecentStampSerializer(restaurants, many=True).data,
-            "cafes": RecentStampSerializer(cafes, many=True).data,
+            'restaurants': list(restaurants),
+            'cafes': list(cafes)
         }
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
