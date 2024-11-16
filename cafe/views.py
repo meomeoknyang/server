@@ -3,7 +3,7 @@ from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Cafe
-from .serializers import CafeSerializer, CafeLocationSerializer
+from .serializers import CafeSerializer, CafeLocationSerializer, CafeDetailSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from django.db.models import F, Count
@@ -84,30 +84,41 @@ class CafeViewSet(viewsets.ModelViewSet):
         
 class CafeDetailView(APIView):
     def get(self, request, place_id):
+        """
+        GET 요청: 특정 식당의 상세 정보 조회
+        """
+        print(request)  # Debug: request 객체 확인
         try:
-            # place_id로 카페 검색
-            cafe = get_object_or_404(Cafe, place_id=place_id)
-            serializer = CafeSerializer(cafe)
+            # 식당 객체 가져오기
+            restaurant = Cafe.objects.get(place_id=place_id)
+            
+            # 데이터 직렬화
+            serializer = CafeDetailSerializer(restaurant, context={'request': request})
+        
+            # 성공 응답 반환
             return CustomResponse(
                 status_text="success",
-                message="카페 상세 조회 성공",
+                message="카페 상세 정보 조회 성공",
                 code=status.HTTP_200_OK,
                 data=serializer.data
             )
         except Cafe.DoesNotExist:
+            # 카페 없을 경우 404 반환
             return CustomResponse(
                 status_text="error",
-                message="해당하는 카페를 찾을 수 없습니다.",
+                message="해당하는 카페가 존재하지 않습니다.",
                 code=status.HTTP_404_NOT_FOUND,
                 data=None
             )
         except Exception as e:
+            # 기타 예외 처리
             return CustomResponse(
                 status_text="error",
-                message="카페 상세 조회 중 오류가 발생했습니다.",
+                message="알 수 없는 오류가 발생했습니다.",
                 code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data=None
+                data={"error": str(e)}
             )
+        
 class CafeLocationView(generics.RetrieveAPIView):
     queryset = Cafe.objects.all()
     serializer_class = CafeLocationSerializer

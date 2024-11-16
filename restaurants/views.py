@@ -2,7 +2,7 @@ from rest_framework import viewsets, status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Restaurant
-from .serializers import RestaurantSerializer, RestaurantLocationSerializer
+from .serializers import RestaurantSerializer, RestaurantLocationSerializer, RestaurantDetailSerializer
 from urllib.parse import unquote
 from django.db.models import Count, F, Q
 from rest_framework.permissions import AllowAny
@@ -89,16 +89,22 @@ class RestaurantViewSet(viewsets.ModelViewSet):
 
 
 class RestaurantDetailView(APIView):
+    """
+    식당 상세 정보를 조회하는 뷰
+    """
     def get(self, request, place_id):
-        # decoded_name = unquote(name)
+        """
+        GET 요청: 특정 식당의 상세 정보 조회
+        """
+        print(request)  # Debug: request 객체 확인
         try:
-            # # 이름으로 식당 검색
-            # restaurant = Restaurant.objects.get(name=decoded_name)
-            # serializer = RestaurantSerializer(restaurant)
-            # return Response(serializer.data)
-            # place_id로 식당 검색
+            # 식당 객체 가져오기
             restaurant = Restaurant.objects.get(place_id=place_id)
-            serializer = RestaurantSerializer(restaurant)
+            
+            # 데이터 직렬화
+            serializer = RestaurantDetailSerializer(restaurant, context={'request': request})
+        
+            # 성공 응답 반환
             return CustomResponse(
                 status_text="success",
                 message="식당 상세 정보 조회 성공",
@@ -106,6 +112,7 @@ class RestaurantDetailView(APIView):
                 data=serializer.data
             )
         except Restaurant.DoesNotExist:
+            # 식당이 없을 경우 404 반환
             return CustomResponse(
                 status_text="error",
                 message="해당하는 식당이 존재하지 않습니다.",
@@ -113,12 +120,15 @@ class RestaurantDetailView(APIView):
                 data=None
             )
         except Exception as e:
+            # 기타 예외 처리
             return CustomResponse(
                 status_text="error",
                 message="알 수 없는 오류가 발생했습니다.",
                 code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data=None
+                data={"error": str(e)}
             )
+
+
 class RestaurantLocationView(generics.RetrieveAPIView):
     queryset = Restaurant.objects.all()
     serializer_class = RestaurantLocationSerializer
