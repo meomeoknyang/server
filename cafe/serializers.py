@@ -8,6 +8,8 @@ from django.db.models import Avg, Count
 from django.contrib.contenttypes.models import ContentType
 from stamps.models import StampedPlace
 from django.contrib.contenttypes.models import ContentType
+from reviews.models import ReviewImage
+from reviews.serializers import ReviewImageSerializer
 
 class CafeLocationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -170,13 +172,13 @@ class CafeDetailSerializer(serializers.ModelSerializer):
     comments = serializers.SerializerMethodField()
     average_price = serializers.SerializerMethodField()
     visit_count = serializers.SerializerMethodField()  # 사용자별 방문 횟수 추가
-
+    review_images = serializers.SerializerMethodField()
     class Meta:
         model = Cafe
         fields = [
             'place_id', 'name', 'categories', 'image_url', 'contact',
             'distance_from_gate', 'address', 'phone_number', 'open_date', 'departments', 
-            'break_times', 'menus', 'average_rating', 'keywords', 'comments', 'average_price', 'visit_count'
+            'break_times', 'menus', 'average_rating', 'keywords', 'comments', 'average_price', 'visit_count', 'review_images'
         ]
         extra_kwargs = {
             'image_url': {'required': False, 'allow_null': True},
@@ -270,3 +272,19 @@ class CafeDetailSerializer(serializers.ModelSerializer):
             except StampedPlace.DoesNotExist:
                 return 0  # 방문 기록이 없는 경우
         return 0  # 인증되지 않은 사용자
+    
+    def get_review_images(self, obj):
+        """
+        리뷰 이미지 데이터를 가져오는 메서드
+        """
+        try:
+            content_type = ContentType.objects.get_for_model(Cafe)
+            # 리뷰 이미지 필터링 (해당 카페의 리뷰)
+            images = ReviewImage.objects.filter(
+                review__content_type=content_type,
+                review__object_id=obj.place_id
+            )
+            return ReviewImageSerializer(images, many=True).data
+        except Exception as e:
+            print(f"[ERROR] get_review_images failed: {e}")
+            return []
