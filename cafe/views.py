@@ -3,7 +3,7 @@ from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Cafe
-from .serializers import CafeSerializer, CafeLocationSerializer, CafeDetailSerializer
+from .serializers import CafeSerializer, CafeLocationSerializer, CafeDetailSerializer, RandomCafeSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from django.db.models import F, Count
@@ -11,6 +11,7 @@ from meomeoknyang.responses import CustomResponse
 from baseplace.models import Menu
 from django.contrib.contenttypes.models import ContentType 
 from stamps.models import StampedPlace
+import random
 
 class CafeViewSet(viewsets.ModelViewSet):
     queryset = Cafe.objects.all()  # 기본 전체 쿼리셋 설정
@@ -209,4 +210,33 @@ class FilteredCafeLocationView(generics.ListAPIView):
                 message="카페 위치 필터링 조회 중 오류가 발생했습니다.",
                 code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 data=None
+            )
+        
+
+class RandomCafeView(APIView):
+    def get(self, request):
+        try:
+            cafe_count = Cafe.objects.count()  # 총 식당 개수 가져오기
+            if cafe_count == 0:
+                return CustomResponse(
+                    status_text="error",
+                    message="등록된 식당이 없습니다.",
+                    code=status.HTTP_404_NOT_FOUND,
+                    data=None
+                )
+            random_index = random.randint(0, cafe_count - 1)  # 랜덤 인덱스 생성
+            random_cafe = Cafe.objects.all()[random_index]  # 랜덤 식당 가져오기
+            serializer = RandomCafeSerializer(random_cafe, context={'request': request})
+            return CustomResponse(
+                status_text="success",
+                message="랜덤 카페 정보 조회 성공",
+                code=status.HTTP_200_OK,
+                data=serializer.data
+            )
+        except Exception as e:
+            return CustomResponse(
+                status_text="error",
+                message="알 수 없는 오류가 발생했습니다.",
+                code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                data={"error": str(e)}
             )

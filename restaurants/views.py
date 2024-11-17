@@ -2,7 +2,7 @@ from rest_framework import viewsets, status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Restaurant
-from .serializers import RestaurantSerializer, RestaurantLocationSerializer, RestaurantDetailSerializer
+from .serializers import RestaurantSerializer, RestaurantLocationSerializer, RestaurantDetailSerializer, RandomRestaurantSerializer
 from urllib.parse import unquote
 from django.db.models import Count, F, Q
 from rest_framework.permissions import AllowAny
@@ -10,6 +10,7 @@ from meomeoknyang.responses import CustomResponse
 from baseplace.models import Menu
 from django.contrib.contenttypes.models import ContentType 
 from stamps.models import StampedPlace
+import random
 
 class RestaurantViewSet(viewsets.ModelViewSet):
     queryset = Restaurant.objects.all()  # 기본 전체 쿼리셋 설정
@@ -218,4 +219,32 @@ class FilteredRestaurantLocationView(generics.ListAPIView):
                 message="식당 위치 목록을 불러오는 중 오류가 발생했습니다.",
                 code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 data=None
+            )
+        
+class RandomRestaurantView(APIView):
+    def get(self, request):
+        try:
+            restaurant_count = Restaurant.objects.count()  # 총 식당 개수 가져오기
+            if restaurant_count == 0:
+                return CustomResponse(
+                    status_text="error",
+                    message="등록된 식당이 없습니다.",
+                    code=status.HTTP_404_NOT_FOUND,
+                    data=None
+                )
+            random_index = random.randint(0, restaurant_count - 1)  # 랜덤 인덱스 생성
+            random_restaurant = Restaurant.objects.all()[random_index]  # 랜덤 식당 가져오기
+            serializer = RandomRestaurantSerializer(random_restaurant, context={'request': request})
+            return CustomResponse(
+                status_text="success",
+                message="랜덤 식당 정보 조회 성공",
+                code=status.HTTP_200_OK,
+                data=serializer.data
+            )
+        except Exception as e:
+            return CustomResponse(
+                status_text="error",
+                message="알 수 없는 오류가 발생했습니다.",
+                code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                data={"error": str(e)}
             )

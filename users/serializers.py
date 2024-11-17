@@ -6,6 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import status
 from meomeoknyang.responses import CustomResponse
 from rest_framework.exceptions import AuthenticationFailed
+from django.core.exceptions import ObjectDoesNotExist
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -56,19 +57,39 @@ class CustomUserSerializer(serializers.ModelSerializer):
     #         "cafes": cafes,
     #     }
     def get_recent_stamp_places(self, obj):
-    # 최근 방문 레코드를 가져오기 (visit_count를 기준으로 정렬)
-        restaurants = StampedPlace.objects.filter(
-            user=obj, content_type__model='restaurant'
-        ).order_by('-visit_count')[:5].values_list('object_id', flat=True)
-        
-        cafes = StampedPlace.objects.filter(
-            user=obj, content_type__model='cafe'
-        ).order_by('-visit_count')[:5].values_list('object_id', flat=True)
-        
-        return {
-            'restaurants': list(restaurants),
-            'cafes': list(cafes)
-        }
+        try:
+            request = self.context.get('request')
+
+            # 식당과 카페 통합 조회
+            stamped_places = StampedPlace.objects.filter(
+                user=obj,
+                content_type__model__in=['restaurant', 'cafe']
+            ).order_by('-id')[:5]  # 최신순으로 5개만 가져오기
+
+            # 직렬화할 데이터 준비
+            places = []
+            from restaurants.serializers import RandomRestaurantSerializer, Restaurant
+            from cafe.serializers import RandomCafeSerializer, Cafe
+
+            for stamped_place in stamped_places:
+                place = stamped_place.place  # `place`는 content_object와 동일
+                if isinstance(place, Restaurant):
+                    places.append({
+                        "type": "restaurant",
+                        "data": RandomRestaurantSerializer(place, context={'request': request}).data
+                    })
+                elif isinstance(place, Cafe):
+                    places.append({
+                        "type": "cafe",
+                        "data": RandomCafeSerializer(place, context={'request': request}).data
+                    })
+
+            return places  # 통합 리스트 반환
+
+        except Exception as e:
+            print(f"[ERROR in get_recent_stamp_places]: {e}")
+            return []
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'user_id'
