@@ -8,6 +8,7 @@ from .models import Review
 from .serializers import ReviewSerializer
 from users.models import CustomUser
 from meomeoknyang.responses import CustomResponse
+from rest_framework.permissions import IsAuthenticated
 
 class ReviewListCreateView(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer
@@ -117,6 +118,32 @@ class ReviewDetailView(APIView):
                 code=status.HTTP_404_NOT_FOUND,
                 data=None
             )
+        except Exception as e:
+            return CustomResponse(
+                status_text="error",
+                message="리뷰 조회 중 알 수 없는 오류가 발생했습니다.",
+                code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                data=str(e)
+            )
+
+class ReviewCountView(APIView):
+    permission_classes = [IsAuthenticated]  # 유저 인증 필요
+
+    def get(self, request):
+        try:
+            # 현재 인증된 사용자 가져오기
+            user = request.user
+            
+            # 해당 사용자의 리뷰 수 조회
+            review_count = Review.objects.filter(user=user).count()
+            data = review_count
+            return CustomResponse(
+                status_text="success",
+                message="리뷰 개수를 성공적으로 조회했습니다.",
+                code=status.HTTP_200_OK,
+                data=data
+            )
+
         except Exception as e:
             return CustomResponse(
                 status_text="error",
