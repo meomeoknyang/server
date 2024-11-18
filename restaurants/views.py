@@ -168,7 +168,12 @@ class FilteredRestaurantLocationView(generics.ListAPIView):
 
         # 방문 여부 필터링
         visited = self.request.GET.get('visited')
-
+                # 익명 사용자 처리
+        user = self.request.user
+        if not user.is_authenticated:
+            # 익명 사용자의 경우 빈 QuerySet 반환
+            return queryset.none()
+        
         if visited in ['true', 'false']:
             # ContentType 가져오기
             restaurant_content_type = ContentType.objects.get_for_model(Restaurant)
@@ -242,6 +247,46 @@ class RandomRestaurantView(APIView):
                 data=serializer.data
             )
         except Exception as e:
+            return CustomResponse(
+                status_text="error",
+                message="알 수 없는 오류가 발생했습니다.",
+                code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                data={"error": str(e)}
+            )
+        
+class RestaurantLocationDetailView(APIView):
+    """
+    식당 상세 정보를 조회하는 뷰
+    """
+    def get(self, request, place_id):
+        """
+        GET 요청: 특정 식당의 상세 정보 조회
+        """
+        print(request)  # Debug: request 객체 확인
+        try:
+            # 식당 객체 가져오기
+            restaurant = Restaurant.objects.get(place_id=place_id)
+            
+            # 데이터 직렬화
+            serializer = RestaurantDetailSerializer(restaurant, context={'request': request})
+        
+            # 성공 응답 반환
+            return CustomResponse(
+                status_text="success",
+                message="식당 상세 정보 조회 성공",
+                code=status.HTTP_200_OK,
+                data=serializer.data
+            )
+        except Restaurant.DoesNotExist:
+            # 식당이 없을 경우 404 반환
+            return CustomResponse(
+                status_text="error",
+                message="해당하는 식당이 존재하지 않습니다.",
+                code=status.HTTP_404_NOT_FOUND,
+                data=None
+            )
+        except Exception as e:
+            # 기타 예외 처리
             return CustomResponse(
                 status_text="error",
                 message="알 수 없는 오류가 발생했습니다.",

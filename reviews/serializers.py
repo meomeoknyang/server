@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Review, Keyword, ReviewImage
 from users.serializers import CustomUserSerializer
 from django.contrib.contenttypes.models import ContentType
-
+from meomeoknyang import settings
 class KeywordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Keyword
@@ -52,6 +52,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         # 이미지 처리
         images = self.context['request'].FILES.getlist('images', [])
         for image in images:
-            ReviewImage.objects.create(review=review, image=image)
+            review_image = ReviewImage.objects.create(review=review, image=image)
+            print(f"Saved {review_image.image.name} to {settings.DEFAULT_FILE_STORAGE}")
 
         return review

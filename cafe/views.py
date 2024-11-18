@@ -12,6 +12,7 @@ from baseplace.models import Menu
 from django.contrib.contenttypes.models import ContentType 
 from stamps.models import StampedPlace
 import random
+from rest_framework.permissions import AllowAny
 
 class CafeViewSet(viewsets.ModelViewSet):
     queryset = Cafe.objects.all()  # 기본 전체 쿼리셋 설정
@@ -152,13 +153,20 @@ class CafeLocationView(generics.RetrieveAPIView):
 
 class FilteredCafeLocationView(generics.ListAPIView):
     serializer_class = CafeLocationSerializer
+    permission_classes = [AllowAny]  # 비회원 접근 허용
 
     def get_queryset(self):
         queryset = Cafe.objects.all()
-
+        print("Initial QuerySet:", queryset)  # 초기 쿼리셋 확인
         # 방문 여부 필터링
         visited = self.request.GET.get('visited')
 
+        # 익명 사용자 처리
+        user = self.request.user
+        if not user.is_authenticated:
+            # 익명 사용자의 경우 빈 QuerySet 반환
+            return queryset.none()
+        
         if visited in ['true', 'false']:
                 # ContentType 가져오기
             cafe_content_type = ContentType.objects.get_for_model(Cafe)
@@ -168,6 +176,7 @@ class FilteredCafeLocationView(generics.ListAPIView):
                 content_type=cafe_content_type,
                 user=self.request.user
             )
+            print("StampedPlaces for user:", stamped_places)
             if visited == 'true':
                 stamped_places = stamped_places.filter(visit_count__gt=0)
             elif visited == 'false':
@@ -209,7 +218,7 @@ class FilteredCafeLocationView(generics.ListAPIView):
                 status_text="error",
                 message="카페 위치 필터링 조회 중 오류가 발생했습니다.",
                 code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data=None
+                data=str(e)
             )
         
 
