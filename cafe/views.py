@@ -6,13 +6,14 @@ from .models import Cafe
 from .serializers import CafeSerializer, CafeLocationSerializer, CafeDetailSerializer, RandomCafeSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
-from django.db.models import F, Count
+from django.db.models import F, Count, Q
 from meomeoknyang.responses import CustomResponse
 from baseplace.models import Menu
 from django.contrib.contenttypes.models import ContentType 
 from stamps.models import StampedPlace
 import random
 from rest_framework.permissions import AllowAny
+
 
 class CafeViewSet(viewsets.ModelViewSet):
     queryset = Cafe.objects.all()  # 기본 전체 쿼리셋 설정
