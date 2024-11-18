@@ -30,7 +30,7 @@ def get_env_variable(var_name):
     error_msg = 'Set the {} environment variable'.format(var_name)
     raise ImproperlyConfigured(error_msg)
 
-# SECRET_KEY= get_env_variable('DJANGO_SECRET')
+SECRET_KEY= get_env_variable('DJANGO_SECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -126,21 +126,21 @@ from dotenv import load_dotenv
 
 # .env 파일 로드
 load_dotenv()
-SECRET_KEY = os.getenv('DJANGO_SECRET')
+# SECRET_KEY = os.getenv('DJANGO_SECRET')
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE'),
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-        # 'ENGINE': 'django.db.backends.postgresql',
-		# 'NAME': get_env_variable('DB_NAME'),
-        # 'USER': get_env_variable('DB_USER'),
-        # 'PASSWORD': get_env_variable('DB_PASSWORD'),
-        # 'HOST': get_env_variable('DB_HOST'),
-        # 'PORT': get_env_variable('DB_PORT'),
+        # 'ENGINE': os.getenv('DB_ENGINE'),
+        # 'NAME': os.getenv('DB_NAME'),
+        # 'USER': os.getenv('DB_USER'),
+        # 'PASSWORD': os.getenv('DB_PASSWORD'),
+        # 'HOST': os.getenv('DB_HOST'),
+        # 'PORT': os.getenv('DB_PORT'),
+        'ENGINE': 'django.db.backends.postgresql',
+		'NAME': get_env_variable('DB_NAME'),
+        'USER': get_env_variable('DB_USER'),
+        'PASSWORD': get_env_variable('DB_PASSWORD'),
+        'HOST': get_env_variable('DB_HOST'),
+        'PORT': get_env_variable('DB_PORT'),
     }
 }
 
