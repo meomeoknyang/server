@@ -149,14 +149,14 @@ class RestaurantLocationView(generics.RetrieveAPIView):
                 status_text="error",
                 message="해당 식당의 위치 정보를 찾을 수 없습니다.",
                 code=status.HTTP_404_NOT_FOUND,
-                data=None
+                data=str(e)
             )
         except Exception as e:
             return CustomResponse(
                 status_text="error",
                 message="알 수 없는 오류가 발생했습니다.",
                 code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data=None
+                data=str(e)
             )
 
 class FilteredRestaurantLocationView(generics.ListAPIView):
