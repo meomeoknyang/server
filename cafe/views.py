@@ -31,11 +31,11 @@ class CafeViewSet(viewsets.ModelViewSet):
 
             if visited in ['true', 'false']:
                 # ContentType 가져오기
-                restaurant_content_type = ContentType.objects.get_for_model(Restaurant)
+                cafe_content_type = ContentType.objects.get_for_model(Cafe)
 
                 # StampedPlace에서 방문 여부 필터링
                 stamped_places = StampedPlace.objects.filter(
-                    content_type=restaurant_content_type,
+                    content_type=cafe_content_type,
                     user=request.user
                 )
                 if visited == 'true':
