@@ -24,7 +24,7 @@ class SearchView(APIView):
         
         model_map = {
             "restaurant": (Restaurant, SearchRestaurantSerializer, 7),
-            "cafe": (Cafe, SearchCafeSerializer, 17)
+            "cafe": (Cafe, SearchCafeSerializer, 16)
         }
 
         model, serializer_class, content_type_id = model_map.get(place_type, (None, None, None))
@@ -36,9 +36,10 @@ class SearchView(APIView):
             )
         
         # 메뉴 검색
-        menu_results = Menu.objects.filter(
+        menu_results = (Menu.objects.filter(
             content_type_id=content_type_id,  # 필터로 content_type_id를 사용
             name__icontains=query
+            ).distinct('name')
         )[:10]  # 예시: 10개 제한
         print(f"Menu results: {menu_results}")  # 검색 결과 확인
         
