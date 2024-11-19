@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db.models import Max
+from meomeoknyang.asset_storage import MediaStorage
 
 class Keyword(models.Model):
     description = models.CharField(max_length=100, unique=True)
@@ -40,7 +41,7 @@ class Review(models.Model):
 
 class ReviewImage(models.Model):
     review = models.ForeignKey(Review, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='review_images/')
+    image = models.ImageField(upload_to='review_images/', storage=MediaStorage())
 
     def __str__(self):
         return f"Image for {self.review.place} review"

@@ -6,6 +6,10 @@ from baseplace.serializers import BreakTimeSerializer
 from reviews.models import Review
 from django.db.models import Avg, Count
 from django.contrib.contenttypes.models import ContentType
+from stamps.models import StampedPlace
+from django.contrib.contenttypes.models import ContentType
+from reviews.models import ReviewImage
+from reviews.serializers import ReviewImageSerializer
 
 class CafeLocationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,20 +47,107 @@ class CafeSerializer(serializers.ModelSerializer):
     ### 카페 시리얼라이저
     '''
     categories = CafeCategorySerializer(many=True)  # 카테고리: Many-to-Many 관계
+    # departments = serializers.StringRelatedField(many=True)
+    # operating_hours = OperatingHoursSerializer(many=True, read_only=True)
+    break_times = BreakTimeSerializer(many=True, read_only=True)
+    # menus = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    # keywords = serializers.SerializerMethodField()
+    # comments = serializers.SerializerMethodField()
+    average_price = serializers.SerializerMethodField()
+    visit_count = serializers.SerializerMethodField()  # 사용자별 방문 횟수 추가
+
+    class Meta:
+        model = Cafe
+        fields = [
+            'place_id', 'name', 'categories', 'image_url',
+            'distance_from_gate', 
+            'break_times', 'average_rating', 'average_price', 'visit_count'
+        ]
+        extra_kwargs = {
+            'image_url': {'required': False, 'allow_null': True},
+            'distance_from_gate': {'required': False, 'allow_null': True},
+            'break_times': {'required': False, 'allow_null': True},
+            'average_rating': {'required': False, 'allow_null': True},
+            'average_price': {'required': False, 'allow_null': True},
+        }
+
+    def create(self, validated_data):
+        categories_data = validated_data.pop('categories', [])
+        cafe = Cafe.objects.create(**validated_data)
+
+        for category_data in categories_data:
+            category, created = CafeCategory.objects.get_or_create(name=category_data['name'])
+            cafe.categories.add(category)
+
+        return cafe
+
+    def update(self, instance, validated_data):
+        categories_data = validated_data.pop('categories', [])
+
+        instance.name = validated_data.get('name', instance.name)
+        instance.image_url = validated_data.get('image_url', instance.image_url)
+        instance.distance_from_gate = validated_data.get('distance_from_gate', instance.distance_from_gate)
+        instance.save()
+
+        instance.categories.clear()
+        for category_data in categories_data:
+            category, created = CafeCategory.objects.get_or_create(name=category_data['name'])
+            instance.categories.add(category)
+
+        return instance
+        
+    def get_average_rating(self, obj):
+        # 평균 평점 계산
+        average_rating = Review.objects.filter(
+            content_type__model='cafe', object_id=obj.place_id
+        ).aggregate(average=Avg('rating'))['average']
+        return average_rating if average_rating is not None else -1
+
+        # 평균 가격 가져오기 메서드
+    def get_average_price(self, obj):
+        return obj.average_price if obj.average_price is not None else 0  # 평균 가격이 없으면 기본값 0 반환
+
+
+    def get_visit_count(self, obj):
+        """
+        현재 사용자와 특정 Restaurant 간의 방문 횟수 반환
+        """
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                stamped_place = StampedPlace.objects.get(
+                    user=user,
+                    content_type=ContentType.objects.get_for_model(Cafe),
+                    object_id=obj.place_id
+                )
+                return stamped_place.visit_count
+            except StampedPlace.DoesNotExist:
+                return 0  # 방문 기록이 없는 경우
+        return 0  # 인증되지 않은 사용자
+    
+
+class CafeDetailSerializer(serializers.ModelSerializer):
+    '''
+    ### 카페 시리얼라이저
+    '''
+    categories = CafeCategorySerializer(many=True)  # 카테고리: Many-to-Many 관계
     departments = serializers.StringRelatedField(many=True)
     # operating_hours = OperatingHoursSerializer(many=True, read_only=True)
     break_times = BreakTimeSerializer(many=True, read_only=True)
-    menus = MenuSerializer(many=True, read_only=True)
+    menus = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
     keywords = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
-
+    average_price = serializers.SerializerMethodField()
+    visit_count = serializers.SerializerMethodField()  # 사용자별 방문 횟수 추가
+    review_images = serializers.SerializerMethodField()
     class Meta:
         model = Cafe
         fields = [
             'place_id', 'name', 'categories', 'image_url', 'contact',
             'distance_from_gate', 'address', 'phone_number', 'open_date', 'departments', 
-            'break_times', 'menus', 'average_rating', 'keywords', 'comments'
+            'break_times', 'menus', 'average_rating', 'keywords', 'comments', 'average_price', 'visit_count', 'review_images'
         ]
         extra_kwargs = {
             'image_url': {'required': False, 'allow_null': True},
@@ -70,6 +161,7 @@ class CafeSerializer(serializers.ModelSerializer):
             'average_rating': {'required': False, 'allow_null': True},
             'keywords': {'required': False, 'allow_null': True},
             'comments': {'required': False, 'allow_null': True},
+            'average_price': {'required': False, 'allow_null': True},
         }
 
     def create(self, validated_data):
@@ -102,8 +194,16 @@ class CafeSerializer(serializers.ModelSerializer):
         return instance
 
     def get_menus(self, obj):
-        return MenuSerializer(obj.menus.all()[:5], many=True).data
-
+        """
+        Menu 데이터를 ContentType과 object_id를 통해 가져오는 메서드
+        """
+        try:
+            content_type = ContentType.objects.get_for_model(Cafe)
+            menus = Menu.objects.filter(content_type=content_type, object_id=obj.place_id)
+            return MenuSerializer(menus, many=True).data
+        except ContentType.DoesNotExist:
+            return []
+        
     def get_average_rating(self, obj):
         # 평균 평점 계산
         average_rating = Review.objects.filter(
@@ -111,6 +211,10 @@ class CafeSerializer(serializers.ModelSerializer):
         ).aggregate(average=Avg('rating'))['average']
         return average_rating if average_rating is not None else -1
     
+        # 평균 가격 가져오기 메서드
+    def get_average_price(self, obj):
+        return obj.average_price if obj.average_price is not None else 0  # 평균 가격이 없으면 기본값 0 반환
+
     def get_keywords(self, obj):
         # Review 모델을 통해 Restaurant 관련 키워드 조회
         return (
@@ -124,3 +228,45 @@ class CafeSerializer(serializers.ModelSerializer):
         # Review 모델을 통해 Restaurant 관련 리뷰 조회
         latest_reviews = Review.objects.filter(content_type__model='cafe', object_id=obj.place_id).order_by('-created_at')[:3]
         return CommentSerializer(latest_reviews, many=True).data  # 최근 3개의 코멘트 반환
+    
+    def get_visit_count(self, obj):
+        """
+        현재 사용자와 특정 Restaurant 간의 방문 횟수 반환
+        """
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                stamped_place = StampedPlace.objects.get(
+                    user=user,
+                    content_type=ContentType.objects.get_for_model(Cafe),
+                    object_id=obj.place_id
+                )
+                return stamped_place.visit_count
+            except StampedPlace.DoesNotExist:
+                return 0  # 방문 기록이 없는 경우
+        return 0  # 인증되지 않은 사용자
+    
+    def get_review_images(self, obj):
+        """
+        리뷰 이미지 데이터를 가져오는 메서드
+        """
+        try:
+            content_type = ContentType.objects.get_for_model(Cafe)
+            # 리뷰 이미지 필터링 (해당 카페의 리뷰)
+            images = ReviewImage.objects.filter(
+                review__content_type=content_type,
+                review__object_id=obj.place_id
+            )
+            return ReviewImageSerializer(images, many=True).data
+        except Exception as e:
+            print(f"[ERROR] get_review_images failed: {e}")
+            return []
+        
+class RandomCafeSerializer(serializers.ModelSerializer):
+    categories = CafeCategorySerializer(many=True)  # 카테고리: Many-to-Many 관계
+
+    class Meta:
+        model = Cafe
+        fields = [
+            'place_id', 'name', 'categories', 'image_url',
+            ]

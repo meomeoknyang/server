@@ -11,7 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 class UserRegistrationView(APIView):
 
-    @swagger_auto_schema(request_body=CustomUserSerializer)
+    @swagger_auto_schema(request_body=UserRegistrationSerializer)
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         try:
@@ -46,11 +46,11 @@ class UserRegistrationView(APIView):
 # 현재 로그인된 사용자 정보 반환
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]  # 로그인된 사용자만 접근 가능
-
+    
     def get(self, request):
         try:
             user = request.user
-            serializer = CustomUserSerializer(user)
+            serializer = CustomUserSerializer(user, context={'request': request})
             return CustomResponse(
                 status_text="success",
                 message="프로필 정보 조회 성공",
@@ -70,8 +70,8 @@ class UserProfileView(APIView):
                 status_text="error",
                 message="알 수 없는 오류가 발생했습니다.",
                 code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                # data={"error": str(e)}
-                data=None
+                data={"error": str(e)}
+                # data=None
             )
         
     #닉네임 업데이트

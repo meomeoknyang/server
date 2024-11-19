@@ -8,6 +8,7 @@ class CafeCategory(models.Model):
     '''
     카페 카테고리
     '''
+    id = models.BigAutoField(primary_key=True)
     CATEGORY_CHOICES = [
         ('카공', '카공'),
         ('디저트', '디저트'),

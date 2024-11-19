@@ -59,14 +59,15 @@ class StampedPlaceTypeListView(generics.ListAPIView):
                     visit_count=-1,
                     rating=None,
                     breaktime=None,
-                    average_price=None,
+                    average_price=place.average_price,
                     distance_from_gate=place.distance_from_gate,
                     place=place
                 ) for place in self.all_places
             ]
 
         # 회원: 사용자별 `StampedPlace` 데이터 반환
-        user_stamped_places = StampedPlace.objects.filter(content_type=content_type, user=user).select_related('place')
+        # user_stamped_places = StampedPlace.objects.filter(content_type=content_type, user=user).select_related('place')
+        user_stamped_places = StampedPlace.objects.filter(content_type=content_type, user=user)
         user_stamped_places_dict = {stamp.object_id: stamp for stamp in user_stamped_places}
 
         return [
@@ -76,9 +77,9 @@ class StampedPlaceTypeListView(generics.ListAPIView):
                     content_type=content_type,
                     object_id=place.place_id,
                     visit_count=0,  # 기본값
-                    rating=None,
+                    rating=StampedPlace.rating,
                     breaktime=None,
-                    average_price=None,
+                    average_price=place.average_price,
                     distance_from_gate=place.distance_from_gate,
                     place=place
                 )
