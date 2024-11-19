@@ -1,6 +1,6 @@
 # cafe/urls.py
 from django.urls import path, include
-from .views import CafeViewSet, CafeDetailView, CafeLocationView, FilteredCafeLocationView
+from .views import CafeViewSet, CafeDetailView, CafeLocationView, FilteredCafeLocationView, RandomCafeView
 
 urlpatterns = [
     path('cafes/', CafeViewSet.as_view({'get': 'list', 'post': 'create'}), name='cafe-list'),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('cafes/<int:place_id>/', CafeDetailView.as_view(), name='cafe-detail'),
     path('cafes/<int:place_id>/location/', CafeLocationView.as_view(), name='cafe-location'),
     path('cafes/locations/', FilteredCafeLocationView.as_view(), name='filtered-cafe-locations'),
+    path('cafes/random', RandomCafeView.as_view(), name='random-restaurant'),
 ]
