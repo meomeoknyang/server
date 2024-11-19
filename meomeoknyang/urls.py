@@ -14,6 +14,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.http import HttpResponse
+import logging
 from django.contrib import admin
 from django.urls import path, include, re_path
 from rest_framework import permissions
@@ -23,19 +25,30 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 schema_view = get_schema_view(
-   openapi.Info(
-      title="meomeoknyang API",
-      default_version='v3',
-      description="API documentation for the Django project",
-      license=openapi.License(name="BSD License"),
-   ),
-   public=True,
-   permission_classes=(permissions.AllowAny,),
+    openapi.Info(
+        title="meomeoknyang API",
+        default_version='v3',
+        description="API documentation for the Django project",
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
 )
 
-urlpatterns = [
+try:
+    logger = logging.getLogger('django')
+except ValueError as e:
+    logger = logging.getLogger(__name__)
+    logger.error(f"Error configuring logger: {e}")
 
-   
+
+def test_logging(request):
+    logger.error("This is a test error message!")  # ERROR 수준의 로그 전송
+    return HttpResponse("Check your Loggly account.")
+
+
+urlpatterns = [
+    path('test_logging/', test_logging),
 
     path("admin/", admin.site.urls),
     path('', include('restaurants.urls')),  # restaurants 앱
@@ -45,9 +58,12 @@ urlpatterns = [
     path('', include('stamps.urls')),
     path('', include('search.urls')),
 
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('swagger/', schema_view.with_ui('swagger',
+         cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc',
+         cache_timeout=0), name='schema-redoc'),
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
