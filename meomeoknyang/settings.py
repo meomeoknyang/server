@@ -39,7 +39,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CustomLogglyFormatter 클래스 정의
+# CustomLogglyFormatter 클래스 정의
 class CustomLogglyFormatter(logging.Formatter):
     def format(self, record):
         try:
