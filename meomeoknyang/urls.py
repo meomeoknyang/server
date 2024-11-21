@@ -60,9 +60,9 @@ urlpatterns = [
     path('', include('stamps.urls')),
     path('', include('search.urls')),
 
-    if settings.DEBUG:
-        urlpatterns += static(settings.MEDIA_URL,
-                              document_root=settings.MEDIA_ROOT)
+    # if settings.DEBUG:
+    #     urlpatterns += static(settings.MEDIA_URL,
+    #                           document_root=settings.MEDIA_ROOT)
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root':settings.MEDIA_ROOT}),
 
     path('swagger/', schema_view.with_ui('swagger',
